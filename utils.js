@@ -33,3 +33,29 @@ function getShader(gl, id) {
         return shader;
 }
 
+var mvMatrixStack = [];
+
+function mvPushMatrix(mvMatrix) {
+	var copy = mat4.create();
+	mat4.set(mvMatrix, copy);
+	mvMatrixStack.push(copy);
+}
+
+function mvPopMatrix() {
+	if (mvMatrixStack.length == 0) {
+	    throw "Invalid popMatrix!";
+	}
+	return mvMatrixStack.pop();
+}
+
+
+function setMatrixUniforms(pMatrix, mvMatrix) {
+	gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
+	gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
+}
+
+
+function degToRad(degrees) {
+	return degrees * Math.PI / 180;
+}
+
