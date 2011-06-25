@@ -103,10 +103,10 @@
 		}
 */
         var vertices = [
-             1.0,  1.0,  0.0,
-            -1.0,  1.0,  0.0,
-             1.0, -1.0,  0.0,
-            -1.0, -1.0,  0.0
+             1.0, 0.0,  1.0,
+            -1.0, 0.0,  1.0,
+             1.0, 0.0, -1.0,
+            -1.0, 0.0, -1.0
         ]
 
         	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
@@ -242,7 +242,7 @@
 
 		// terrain
 		mvPushMatrix(mvMatrix)
-		mat4.translate(mvMatrix, [3.0, 0.0, -8.0]);
+		mat4.translate(mvMatrix, [3.0, -1.0, -8.0]);
 		gl.bindBuffer(gl.ARRAY_BUFFER, terrainVertexPositionBuffer)
 		gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, terrainVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0)
 
