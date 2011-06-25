@@ -183,8 +183,8 @@
 
 	// up, sohcahtoa
 	bind(38, function() {
-		position.x += Math.sin(position.yaw)
-		position.z -= Math.cos(position.yaw)
+		position.x -= Math.sin(degToRad(position.yaw))
+		position.z -= Math.cos(degToRad(position.yaw))
 	})
 
 	// right
@@ -194,8 +194,8 @@
 
 	// down
 	bind(40, function() {
-		position.x -= Math.sin(position.yaw)
-		position.z += Math.cos(position.yaw)
+		position.x += Math.sin(degToRad(position.yaw))
+		position.z += Math.cos(degToRad(position.yaw))
 	})
 
 	var rCube = 0;
