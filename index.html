@@ -78,11 +78,36 @@
 		shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
 	}
 
+	var keyMap = new Object()
+
+	function handleKeyDown(event) {
+        	keyMap[event.keyCode] = true
+	}
+
+	function handleKeyUp(event) {
+        	keyMap[event.keyCode] = false
+    	}
+
+	// 37 left, 38 up, 39 right, 40 down
+	var bindings = new Array()
+
+	function bind(key, action) {
+		bindings.push({
+			key: key,
+			action: action })
+	}
+
+	function handleKeys() {
+		for(var i = 0 ; i < bindings.length ; i++) {
+			if(keyMap[bindings[i].key]) {
+				bindings[i].action()
+			}
+		}
+	}
+
 
 	var mvMatrix = mat4.create();
 	var pMatrix = mat4.create();
-
-
 
 
 	var cubeVertexPositionBuffer;
@@ -169,8 +194,16 @@
         cubeVertexIndexBuffer.numItems = 36;
     }
 
+	var position = {
+		x: 0,
+		y: 0,
+		z: 0,
+		yaw: 0,
+		pitch: 0,
+		roll: 0
+	}
 
-    var rCube = 0;
+	var rCube = 0;
 
     function drawScene() {
         gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
@@ -214,25 +247,29 @@
 
 
     function tick() {
-        requestAnimFrame(tick);
-        drawScene();
-        animate();
+        requestAnimFrame(tick)
+	handleKeys()
+        drawScene()
+        animate()
     }
 
 
-    function webGLStart() {
-        var canvas = document.getElementById("canvas");
-	canvas.width = 800 
-	canvas.height = 600 
-        initGL(canvas);
-        initShaders()
-        initBuffers();
+	function webGLStart() {
+		var canvas = document.getElementById("canvas");
+		canvas.width = 800 
+		canvas.height = 600 
+		initGL(canvas);
+		initShaders()
+		initBuffers();
 
-        gl.clearColor(0.0, 0.0, 0.0, 1.0);
-        gl.enable(gl.DEPTH_TEST);
+		gl.clearColor(0.0, 0.0, 0.0, 1.0);
+		gl.enable(gl.DEPTH_TEST);
 
-        tick();
-    }
+		tick();
+	}
+
+	document.onkeydown = handleKeyDown;
+        document.onkeyup = handleKeyUp;
 </script>
 
 
