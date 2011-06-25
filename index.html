@@ -178,20 +178,24 @@
 
 	// left
 	bind(37, function() {
-		position.yaw--
+		position.yaw++
 	})
 
-	// up
+	// up, sohcahtoa
 	bind(38, function() {
+		position.x += Math.sin(position.yaw)
+		position.z -= Math.cos(position.yaw)
 	})
 
 	// right
 	bind(39, function() {
-		position.yaw++
+		position.yaw--
 	})
 
 	// down
 	bind(40, function() {
+		position.x -= Math.sin(position.yaw)
+		position.z += Math.cos(position.yaw)
 	})
 
 	var rCube = 0;
@@ -204,7 +208,12 @@
 
 		mat4.identity(mvMatrix);
 
-		mat4.rotate(mvMatrix, degToRad(position.yaw), [0, 1, 0]);
+		// camera
+		mat4.rotate(mvMatrix, degToRad(-position.pitch), [1, 0, 0]);
+		mat4.rotate(mvMatrix, degToRad(-position.yaw), [0, 1, 0]);
+		mat4.translate(mvMatrix, [-position.x, -position.y, -position.z]);
+		
+
 		mat4.translate(mvMatrix, [0.0, 0.0, -8.0]);
 
 		mvPushMatrix(mvMatrix);
