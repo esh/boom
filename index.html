@@ -287,7 +287,6 @@
     }
 
 
-    var rPyramid = 0;
     var rCube = 0;
 
     function drawScene() {
@@ -298,24 +297,7 @@
 
         mat4.identity(mvMatrix);
 
-        mat4.translate(mvMatrix, [-1.5, 0.0, -8.0]);
-
-        mvPushMatrix();
-        mat4.rotate(mvMatrix, degToRad(rPyramid), [0, 1, 0]);
-
-        gl.bindBuffer(gl.ARRAY_BUFFER, pyramidVertexPositionBuffer);
-        gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, pyramidVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-        gl.bindBuffer(gl.ARRAY_BUFFER, pyramidVertexColorBuffer);
-        gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, pyramidVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-        setMatrixUniforms();
-        gl.drawArrays(gl.TRIANGLES, 0, pyramidVertexPositionBuffer.numItems);
-
-        mvPopMatrix();
-
-
-        mat4.translate(mvMatrix, [3.0, 0.0, 0.0]);
+        mat4.translate(mvMatrix, [0.0, 0.0, -8.0]);
 
         mvPushMatrix();
         mat4.rotate(mvMatrix, degToRad(rCube), [1, 1, 1]);
@@ -342,7 +324,6 @@
         if (lastTime != 0) {
             var elapsed = timeNow - lastTime;
 
-            rPyramid += (90 * elapsed) / 1000.0;
             rCube -= (75 * elapsed) / 1000.0;
         }
         lastTime = timeNow;
