@@ -203,56 +203,71 @@
 		roll: 0
 	}
 
+	// left
+	bind(37, function() {
+		position.yaw--
+	})
+
+	// up
+	bind(38, function() {
+	})
+
+	// right
+	bind(39, function() {
+		position.yaw++
+	})
+
+	// down
+	bind(40, function() {
+	})
+
 	var rCube = 0;
 
-    function drawScene() {
-        gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+	function drawScene() {
+		gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
+		mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
 
-        mat4.identity(mvMatrix);
+		mat4.identity(mvMatrix);
 
-        mat4.translate(mvMatrix, [0.0, 0.0, -8.0]);
+		mat4.rotate(mvMatrix, degToRad(position.yaw), [0, 1, 0]);
+		mat4.translate(mvMatrix, [0.0, 0.0, -8.0]);
 
-        mvPushMatrix(mvMatrix);
-        mat4.rotate(mvMatrix, degToRad(rCube), [1, 1, 1]);
+		mvPushMatrix(mvMatrix);
+		mat4.rotate(mvMatrix, degToRad(rCube), [1, 1, 1]);
 
-        gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
-        gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, cubeVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+		gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
+		gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, cubeVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-        gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexColorBuffer);
-        gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, cubeVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
+		gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexColorBuffer);
+		gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, cubeVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
-        setMatrixUniforms(pMatrix, mvMatrix);
-        gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
+		setMatrixUniforms(pMatrix, mvMatrix);
+		gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 
-        mvMatrix = mvPopMatrix();
+		mvMatrix = mvPopMatrix();
+	}
 
-    }
+	var lastTime = 0;
 
+	function animate() {
+		var timeNow = new Date().getTime();
+		if (lastTime != 0) {
+			var elapsed = timeNow - lastTime;
 
-    var lastTime = 0;
+			rCube -= (75 * elapsed) / 1000.0;
+		}
+		lastTime = timeNow;
+	}
 
-    function animate() {
-        var timeNow = new Date().getTime();
-        if (lastTime != 0) {
-            var elapsed = timeNow - lastTime;
-
-            rCube -= (75 * elapsed) / 1000.0;
-        }
-        lastTime = timeNow;
-    }
-
-
-    function tick() {
-        requestAnimFrame(tick)
-	handleKeys()
-        drawScene()
-        animate()
-    }
-
+	function tick() {
+		requestAnimFrame(tick)
+		handleKeys()
+		drawScene()
+		animate()
+	}
 
 	function webGLStart() {
 		var canvas = document.getElementById("canvas");
