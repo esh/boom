@@ -7,6 +7,7 @@
 <script type="text/javascript" src="glMatrix-0.9.5.min.js"></script>
 <script type="text/javascript" src="webgl-utils.js"></script>
 <script type="text/javascript" src="utils.js"></script>
+<script type="text/javascript" src="input.js"></script>
 
 <script id="shader-fs" type="x-shader/x-fragment">
     #ifdef GL_ES
@@ -77,34 +78,6 @@
 		shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
 		shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
 	}
-
-	var keyMap = new Object()
-
-	function handleKeyDown(event) {
-        	keyMap[event.keyCode] = true
-	}
-
-	function handleKeyUp(event) {
-        	keyMap[event.keyCode] = false
-    	}
-
-	// 37 left, 38 up, 39 right, 40 down
-	var bindings = new Array()
-
-	function bind(key, action) {
-		bindings.push({
-			key: key,
-			action: action })
-	}
-
-	function handleKeys() {
-		for(var i = 0 ; i < bindings.length ; i++) {
-			if(keyMap[bindings[i].key]) {
-				bindings[i].action()
-			}
-		}
-	}
-
 
 	var mvMatrix = mat4.create();
 	var pMatrix = mat4.create();
