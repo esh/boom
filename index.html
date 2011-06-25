@@ -83,11 +83,37 @@
 	var pMatrix = mat4.create();
 
 
-	var cubeVertexPositionBuffer;
-	var cubeVertexColorBuffer;
-	var cubeVertexIndexBuffer;
+	var cubeVertexPositionBuffer
+	var cubeVertexColorBuffer
+	var cubeVertexIndexBuffer
 
-    function initBuffers() {
+	var terrainVertexPositionBuffer
+
+	function initBuffers() {
+		terrainVertexPositionBuffer = gl.createBuffer()
+        	gl.bindBuffer(gl.ARRAY_BUFFER, terrainVertexPositionBuffer)
+/*
+        	var vertices = new Array()
+		for(var x = 0 ; x < 512 ; x++) {
+			for(var z = 0 ; z < 512 ; z++) {
+				vertices.push(x)
+				vertices.push(-1)
+				vertices.push(z)
+			}
+		}
+*/
+        var vertices = [
+             1.0,  1.0,  0.0,
+            -1.0,  1.0,  0.0,
+             1.0, -1.0,  0.0,
+            -1.0, -1.0,  0.0
+        ]
+
+        	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+        	terrainVertexPositionBuffer.itemSize = 3;
+        	terrainVertexPositionBuffer.numItems = vertices.length / terrainVertexPositionBuffer.itemSize
+
+
         cubeVertexPositionBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
         vertices = [
@@ -181,7 +207,7 @@
 		position.yaw++
 	})
 
-	// up, sohcahtoa
+	// up 
 	bind(38, function() {
 		position.x -= Math.sin(degToRad(position.yaw))
 		position.z -= Math.cos(degToRad(position.yaw))
@@ -214,9 +240,20 @@
 		mat4.translate(mvMatrix, [-position.x, -position.y, -position.z]);
 		
 
-		mat4.translate(mvMatrix, [0.0, 0.0, -8.0]);
+		// terrain
+		mvPushMatrix(mvMatrix)
+		mat4.translate(mvMatrix, [3.0, 0.0, -8.0]);
+		gl.bindBuffer(gl.ARRAY_BUFFER, terrainVertexPositionBuffer)
+		gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, terrainVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0)
 
+		setMatrixUniforms(pMatrix, mvMatrix)
+		gl.drawArrays(gl.TRIANGLE_STRIP, 0, terrainVertexPositionBuffer.numItems)
+		mvMatrix = mvPopMatrix()
+
+
+		// box
 		mvPushMatrix(mvMatrix);
+		mat4.translate(mvMatrix, [0.0, 0.0, -8.0]);
 		mat4.rotate(mvMatrix, degToRad(rCube), [1, 1, 1]);
 
 		gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
@@ -228,7 +265,6 @@
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
 		setMatrixUniforms(pMatrix, mvMatrix);
 		gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
-
 		mvMatrix = mvPopMatrix();
 	}
 
