@@ -195,6 +195,17 @@
 		position.z += Math.cos(degToRad(position.yaw))
 	})
 
+	function setMatrixUniforms() {
+		gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
+		gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
+
+		var normalMatrix = mat3.create();
+		mat4.toInverseMat3(mvMatrix, normalMatrix);
+		mat3.transpose(normalMatrix);
+		gl.uniformMatrix3fv(shaderProgram.nMatrixUniform, false, normalMatrix);
+	}
+
+
 	function drawScene() {
 		gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -225,7 +236,7 @@
 		gl.uniform3f(shaderProgram.directionalColorUniform, 0.2, 0.2, 0.2);
 				
 
-		setMatrixUniforms(pMatrix, mvMatrix)
+		setMatrixUniforms()
 		gl.drawArrays(gl.TRIANGLE_STRIP, 0, terrainVertexPositionBuffer.numItems)
 		mvMatrix = mvPopMatrix()
 	}
