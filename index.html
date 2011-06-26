@@ -84,6 +84,7 @@
 
 	var terrainVertexPositionBuffer
 	var terrainVertexColorBuffer
+	var terrainVertexNormalBuffer
 
 	function initBuffers() {
 		terrainVertexPositionBuffer = gl.createBuffer()
@@ -102,6 +103,7 @@
 
 		var vertices = new Array()
 		var colors = new Array();
+		var normals = new Array();
 		for(var z = 0 ; z < rows ; z++) {
 			for(var x = 0 ; x < cols ; x++) {
 				vertices.push(x); vertices.push(heightmap[x][z]); vertices.push(z);
@@ -109,13 +111,19 @@
 
 				colors = colors.concat([1.0, 1.0, 1.0, 1.0])
 				colors = colors.concat([1.0, 1.0, 1.0, 1.0])
+				
+				normals = normals.concat([0.0, 1.0, 0.0])
+				normals = normals.concat([0.0, 1.0, 0.0])
 			}
 			if(z < rows - 1) {
-				vertices.push(cols - 1); vertices.push(0.0); vertices.push(z + 1);
-				vertices.push(0); vertices.push(0.0); vertices.push(z + 1);
+				vertices.push(cols - 1); vertices.push(heightmap[cols - 1][z + 1]); vertices.push(z + 1);
+				vertices.push(0); vertices.push(heightmap[0][z + 1]); vertices.push(z + 1);
 
 				colors = colors.concat([1.0, 1.0, 1.0, 1.0])
 				colors = colors.concat([1.0, 1.0, 1.0, 1.0])
+
+				normals = normals.concat([0.0, 1.0, 0.0])
+				normals = normals.concat([0.0, 1.0, 0.0])
 			}
 		}
 
