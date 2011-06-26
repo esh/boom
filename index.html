@@ -132,24 +132,28 @@
 		var normals = new Array()
 		for(var z = 0 ; z < world[0].length - 1 ; z++) {
 			for(var x = 0 ; x < world.length ; x++) {
-				vertices = vertices.concat([x, world[x][z].y, z])
-				vertices = vertices.concat([x, world[x][z + 1].y, z + 1])
+				vertices.push(x); vertices.push(world[x][z].y); vertices.push(z)
+				vertices.push(x); vertices.push(world[x][z + 1].y); vertices.push(z + 1)
 
-				colors = colors.concat([1.0, 1.0, 1.0, 1.0])
-				colors = colors.concat([1.0, 1.0, 1.0, 1.0])
+				colors.push(1.0); colors.push(1.0); colors.push(1.0); colors.push(1.0)
+				colors.push(1.0); colors.push(1.0); colors.push(1.0); colors.push(1.0)
 	
-				normals = normals.concat(world[x][z].normal)
-				normals = normals.concat(world[x][z + 1].normal)
+				for(var i = 0 ; i < 3 ; i ++) {
+					normals.push(world[x][z].normal[i])
+				}
+				for(var i = 0 ; i < 3 ; i ++) {
+					normals.push(world[x][z + 1].normal[i])
+				}
 			}
 			if(z < world[0].length - 1) {
-				vertices = vertices.concat([world.length - 1, world[world.length - 1][z + 1].y, z + 1])
-				vertices = vertices.concat([0, world[0][z + 1].y, z + 1])
+				vertices.push(world.length - 1); vertices.push(world[world.length - 1][z + 1].y); vertices.push(z + 1)
+				vertices.push(0); vertices.push(world[0][z + 1].y); vertices.push(z + 1)
 				
-				colors = colors.concat([1.0, 1.0, 1.0, 1.0])
-				colors = colors.concat([1.0, 1.0, 1.0, 1.0])
+				colors.push(1.0); colors.push(1.0); colors.push(1.0); colors.push(1.0)
+				colors.push(1.0); colors.push(1.0); colors.push(1.0); colors.push(1.0)
 
-				normals = normals.concat([0.0, 1.0, 0.0])
-				normals = normals.concat([0.0, 1.0, 0.0])
+				normals.push(1.0); normals.push(1.0); normals.push(1.0)
+				normals.push(1.0); normals.push(1.0); normals.push(1.0)
 			}
 		}
 
