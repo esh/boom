@@ -111,12 +111,12 @@
 		var rows = 40 
 		var cols = 40 
 		var heightmap = new Array()
-		for(var z = 0 ; z < rows ; z++) {
-			var row = new Array()
-			for(var x = 0 ; x < cols ; x++) {
-				row.push(Math.round(Math.random()))	
+		for(var x = 0 ; x < cols ; x++) {
+			var col = new Array()
+			for(var z = 0 ; z < rows ; z++) {
+				col.push(x > 0 && z > 0 ? (col[z - 1] + heightmap[x - 1][z]) / 2 + (Math.random() - 0.5) : 0)
 			}
-			heightmap.push(row)
+			heightmap.push(col)
 		}		
 
 		var vertices = new Array()
