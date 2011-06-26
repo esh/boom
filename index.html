@@ -122,11 +122,9 @@
 		for(var x = 0 ; x < cols ; x++) {
 			var col = new Array()
 			for(var z = 0 ; z < rows ; z++) {
-				if(x > 1 && z > 1) {
-					col.push(normalize(crossProduct([1, heightmap[x][z] - heightmap[x - 1][z], 0], [0, heightmap[x][z] - heightmap[x][z - 1], 1])))
-				} else {
-					col.push([0.0, 1.0, 0.0])
-				}
+				col.push(x > 0 && z > 0 ? 
+					normalize(crossProduct([1, heightmap[x][z] - heightmap[x - 1][z], 0], [0, heightmap[x][z] - heightmap[x][z - 1], 1])) :
+					[0.0, 1.0, 0.0])
 			}
 			normals2.push(col)
 		}
