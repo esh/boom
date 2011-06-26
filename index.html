@@ -93,26 +93,18 @@
 		terrainVertexPositionBuffer = gl.createBuffer()
         	gl.bindBuffer(gl.ARRAY_BUFFER, terrainVertexPositionBuffer)
         
-		var rows = 2
-		var cols = 8	
+		var rows = 3
+		var cols = 3	
 		var vertices = new Array()
 		for(var z = 0 ; z < rows ; z++) {
-			if(z % 2 == 0) {
-			// even
-				for(var x = 0 ; x < cols ; x++) {
-					vertices.push(x); vertices.push(0.0); vertices.push(z);
-					vertices.push(x); vertices.push(0.0); vertices.push(z + 1);
-				}
+			for(var x = 0 ; x < cols ; x++) {
+				vertices.push(x); vertices.push(0.0); vertices.push(z);
+				vertices.push(x); vertices.push(0.0); vertices.push(z + 1);
+			}
+			if(z < rows - 1) {
 				vertices.push(cols - 1); vertices.push(0.0); vertices.push(z + 1);
-			} else {
-			// odd
-				for(var x = cols - 1 ; x >= 0 ; x--) {
-					vertices.push(x); vertices.push(0.0); vertices.push(z);
-					vertices.push(x); vertices.push(0.0); vertices.push(z + 1);
-				}
 				vertices.push(0); vertices.push(0.0); vertices.push(z + 1);
 			}
-
 		}
 
         	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
