@@ -129,13 +129,18 @@
 
 				colors = colors.concat([1.0, 1.0, 1.0, 1.0])
 				colors = colors.concat([1.0, 1.0, 1.0, 1.0])
-				
-				normals = normals.concat([0.0, 1.0, 0.0])
-				normals = normals.concat([0.0, 1.0, 0.0])
+	
+				if(x < cols - 1 && z < rows - 2) {
+					normals = normals.concat(normalize(crossProduct([1, heightmap[x + 1][z] - heightmap[x][z], 0], [0, heightmap[x][z + 1] - heightmap[x][z], 1])))
+					normals = normals.concat(normalize(crossProduct([1, heightmap[x + 1][z + 1] - heightmap[x][z + 1], 0], [0, heightmap[x][z + 2] - heightmap[x][z + 1], 1])))
+				} else {			
+					normals = normals.concat([0.0, 1.0, 0.0])
+					normals = normals.concat([0.0, 1.0, 0.0])
+				}
 			}
 			if(z < rows - 1) {
-				vertices.push(cols - 1); vertices.push(heightmap[cols - 1][z + 1]); vertices.push(z + 1);
-				vertices.push(0); vertices.push(heightmap[0][z + 1]); vertices.push(z + 1);
+				vertices = vertices.concat([cols - 1, heightmap[cols - 1][z + 1], z + 1])
+				vertices = vertices.concat([0, heightmap[0][z + 1], z + 1])
 
 				colors = colors.concat([1.0, 1.0, 1.0, 1.0])
 				colors = colors.concat([1.0, 1.0, 1.0, 1.0])
