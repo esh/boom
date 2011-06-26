@@ -42,9 +42,9 @@
 		gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
 		vColor = aVertexColor;
 
-		//vec3 transformedNormal = uNMatrix * aVertexNormal;
-		//float directionalLightWeighting = max(dot(transformedNormal, uLightingDirection), 0.0);
-		//vLightWeighting = uAmbientColor + uDirectionalColor * directionalLightWeighting;
+		vec3 transformedNormal = uNMatrix * aVertexNormal;
+		float directionalLightWeighting = max(dot(transformedNormal, uLightingDirection), 0.0);
+		vLightWeighting = uAmbientColor + uDirectionalColor * directionalLightWeighting;
 		vLightWeighting = vec3(1.0, 1.0, 1.0);
 	}
 </script>
@@ -157,11 +157,11 @@
 		terrainVertexColorBuffer.itemSize = 4;
 		terrainVertexColorBuffer.numItems = colors.length / terrainVertexColorBuffer.itemSize
 
-		terrainNormalVertexBuffer = gl.createBuffer()
-		gl.bindBuffer(gl.ARRAY_BUFFER, terrainNormalVertexBuffer)
+		terrainVertexNormalBuffer = gl.createBuffer()
+		gl.bindBuffer(gl.ARRAY_BUFFER, terrainVertexNormalBuffer)
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW)
-		terrainNormalVertexBuffer.itemSize = 3;
-		terrainNormalVertexBuffer.numItems = colors.length / terrainNormalVertexBuffer.itemSize
+		terrainVertexNormalBuffer.itemSize = 3;
+		terrainVertexNormalBuffer.numItems = normals.length / terrainVertexNormalBuffer.itemSize
 	}
 
 	var position = {
@@ -226,6 +226,9 @@
 
 		gl.bindBuffer(gl.ARRAY_BUFFER, terrainVertexColorBuffer);
 		gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, terrainVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+		gl.bindBuffer(gl.ARRAY_BUFFER, terrainVertexNormalBuffer);
+		gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, terrainVertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
 		gl.uniform3f(shaderProgram.ambientColorUniform, 0.8, 0.8, 0.8)
 		var lightingDirection = [-0.25, -0.25, -0.5]
