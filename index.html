@@ -110,43 +110,36 @@
 	function initBuffers() {
 		var rows = 40 
 		var cols = 40 
-		var heightmap = new Array()
+		var world = new Array()
 		for(var x = 0 ; x < cols ; x++) {
 			var col = new Array()
 			for(var z = 0 ; z < rows ; z++) {
-				col.push(x > 0 && z > 0 ? (col[z - 1] + heightmap[x - 1][z]) / 2 + (Math.random() - 0.5) : 0)
+				var y = x > 0 && z > 0 ? ((col[z - 1].y + world[x - 1][z].y) / 2 + Math.random() - 0.5) : 0
+				col.push({ y: y, 
+					  normal: x > 0 && z > 0 ?
+						normalize(crossProduct([1, y - world[x - 1][z].y, 0], [0, y - col[z - 1].y, 1])) :
+						[0.0, 1.0, 0.0] })
 			}
-			heightmap.push(col)
+			world.push(col)
 		}
-		var normals2 = new Array()
-		for(var x = 0 ; x < cols ; x++) {
-			var col = new Array()
-			for(var z = 0 ; z < rows ; z++) {
-				col.push(x > 0 && z > 0 ? 
-					normalize(crossProduct([1, heightmap[x][z] - heightmap[x - 1][z], 0], [0, heightmap[x][z] - heightmap[x][z - 1], 1])) :
-					[0.0, 1.0, 0.0])
-			}
-			normals2.push(col)
-		}
-
 
 		var vertices = new Array()
 		var colors = new Array();
 		var normals = new Array();
 		for(var z = 0 ; z < rows - 1 ; z++) {
 			for(var x = 0 ; x < cols ; x++) {
-				vertices = vertices.concat([x, heightmap[x][z], z])
-				vertices = vertices.concat([x, heightmap[x][z + 1], z + 1])
+				vertices = vertices.concat([x, world[x][z].y, z])
+				vertices = vertices.concat([x, world[x][z + 1].y, z + 1])
 
 				colors = colors.concat([1.0, 1.0, 1.0, 1.0])
 				colors = colors.concat([1.0, 1.0, 1.0, 1.0])
 	
-				normals = normals.concat(normals2[x][z])
-				normals = normals.concat(normals2[x][z + 1])
+				normals = normals.concat(world[x][z].normal)
+				normals = normals.concat(world[x][z + 1].normal)
 			}
 			if(z < rows - 1) {
-				vertices = vertices.concat([cols - 1, heightmap[cols - 1][z + 1], z + 1])
-				vertices = vertices.concat([0, heightmap[0][z + 1], z + 1])
+				vertices = vertices.concat([cols - 1, world[cols - 1][z + 1].y, z + 1])
+				vertices = vertices.concat([0, world[0][z + 1].y, z + 1])
 
 				colors = colors.concat([1.0, 1.0, 1.0, 1.0])
 				colors = colors.concat([1.0, 1.0, 1.0, 1.0])
