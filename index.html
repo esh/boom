@@ -195,6 +195,15 @@
 		gl.bindBuffer(gl.ARRAY_BUFFER, terrainVertexColorBuffer);
 		gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, terrainVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
+		gl.uniform3f(shaderProgram.ambientColorUniform, 0.8, 0.8, 0.8)
+		var lightingDirection = [-0.25, -0.25, -0.5]
+		var adjustedLD = vec3.create();
+		vec3.normalize(lightingDirection, adjustedLD);
+		vec3.scale(adjustedLD, -1);
+		gl.uniform3fv(shaderProgram.lightingDirectionUniform, adjustedLD);
+		gl.uniform3f(shaderProgram.directionalColorUniform, 0.2, 0.2, 0.2);
+				
+
 		setMatrixUniforms(pMatrix, mvMatrix)
 		gl.drawArrays(gl.TRIANGLE_STRIP, 0, terrainVertexPositionBuffer.numItems)
 		mvMatrix = mvPopMatrix()
