@@ -103,8 +103,8 @@
 
 	var world
 	function initWorld() {
-		var rows = 40 
-		var cols = 40
+		var rows = 64 
+		var cols = 64 
 		world = new Array()
 		for(var x = 0 ; x < cols ; x++) {
 			var col = new Array()
@@ -128,8 +128,8 @@
 
 	function initBuffers() {
 		var vertices = new Array()
-		var colors = new Array();
-		var normals = new Array();
+		var colors = new Array()
+		var normals = new Array()
 		for(var z = 0 ; z < world[0].length - 1 ; z++) {
 			for(var x = 0 ; x < world.length ; x++) {
 				vertices = vertices.concat([x, world[x][z].y, z])
@@ -144,7 +144,7 @@
 			if(z < world[0].length - 1) {
 				vertices = vertices.concat([world.length - 1, world[world.length - 1][z + 1].y, z + 1])
 				vertices = vertices.concat([0, world[0][z + 1].y, z + 1])
-
+				
 				colors = colors.concat([1.0, 1.0, 1.0, 1.0])
 				colors = colors.concat([1.0, 1.0, 1.0, 1.0])
 
@@ -233,15 +233,14 @@
 		gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, terrainVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0)
 
 		gl.bindBuffer(gl.ARRAY_BUFFER, terrainVertexColorBuffer);
-		gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, terrainVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
+		gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, terrainVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0)
 
 		gl.bindBuffer(gl.ARRAY_BUFFER, terrainVertexNormalBuffer);
-		gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, terrainVertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
+		gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, terrainVertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0)
 
-		gl.uniform3fv(shaderProgram.lightingDirectionUniform, [-0.25, -0.25, -0.5]);
+		gl.uniform3fv(shaderProgram.lightingDirectionUniform, [-0.25, -0.25, -0.5])
 		gl.uniform3f(shaderProgram.ambientColorUniform, 0.5, 0.5, 0.5)
-		gl.uniform3f(shaderProgram.directionalColorUniform, 0.5, 0.5, 0.5);
-				
+		gl.uniform3f(shaderProgram.directionalColorUniform, 0.5, 0.5, 0.5)
 
 		setMatrixUniforms()
 		gl.drawArrays(gl.TRIANGLE_STRIP, 0, terrainVertexPositionBuffer.numItems)
@@ -269,11 +268,12 @@
 		var canvas = document.getElementById("canvas")
 		canvas.width = $(document).width() 
 		canvas.height = $(document).height() 
+
 		initGL(canvas)
 		initWorld()
 		initShaders()
 		initBuffers()
-
+		
 		gl.clearColor(0.0, 0.0, 0.0, 1.0)
 		gl.enable(gl.DEPTH_TEST)
 
