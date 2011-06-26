@@ -45,7 +45,6 @@
 		vec3 transformedNormal = uNMatrix * aVertexNormal;
 		float directionalLightWeighting = max(dot(transformedNormal, uLightingDirection), 0.0);
 		vLightWeighting = uAmbientColor + uDirectionalColor * directionalLightWeighting;
-		vLightWeighting = vec3(1.0, 1.0, 1.0);
 	}
 </script>
 
@@ -235,13 +234,9 @@
 		gl.bindBuffer(gl.ARRAY_BUFFER, terrainVertexNormalBuffer);
 		gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, terrainVertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-		gl.uniform3f(shaderProgram.ambientColorUniform, 0.8, 0.8, 0.8)
-		var lightingDirection = [-0.25, -0.25, -0.5]
-		var adjustedLD = vec3.create();
-		vec3.normalize(lightingDirection, adjustedLD);
-		vec3.scale(adjustedLD, -1);
-		gl.uniform3fv(shaderProgram.lightingDirectionUniform, adjustedLD);
-		gl.uniform3f(shaderProgram.directionalColorUniform, 0.2, 0.2, 0.2);
+		gl.uniform3fv(shaderProgram.lightingDirectionUniform, [-0.25, -0.25, -0.5]);
+		gl.uniform3f(shaderProgram.ambientColorUniform, 0.5, 0.5, 0.5)
+		gl.uniform3f(shaderProgram.directionalColorUniform, 0.5, 0.5, 0.5);
 				
 
 		setMatrixUniforms()
