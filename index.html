@@ -124,8 +124,8 @@
 		var normals = new Array();
 		for(var z = 0 ; z < rows ; z++) {
 			for(var x = 0 ; x < cols ; x++) {
-				vertices.push(x); vertices.push(heightmap[x][z]); vertices.push(z);
-				vertices.push(x); vertices.push(heightmap[x][z + 1]); vertices.push(z + 1);
+				vertices = vertices.concat([x, heightmap[x][z], z])
+				vertices = vertices.concat([x, heightmap[x][z + 1], z + 1])
 
 				colors = colors.concat([1.0, 1.0, 1.0, 1.0])
 				colors = colors.concat([1.0, 1.0, 1.0, 1.0])
