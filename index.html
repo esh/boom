@@ -87,9 +87,6 @@
 	var terrainVertexNormalBuffer
 
 	function initBuffers() {
-		terrainVertexPositionBuffer = gl.createBuffer()
-        	gl.bindBuffer(gl.ARRAY_BUFFER, terrainVertexPositionBuffer)
-        
 		var rows = 32 
 		var cols = 32 
 		var heightmap = new Array()
@@ -127,6 +124,8 @@
 			}
 		}
 
+		terrainVertexPositionBuffer = gl.createBuffer()
+        	gl.bindBuffer(gl.ARRAY_BUFFER, terrainVertexPositionBuffer)
         	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
         	terrainVertexPositionBuffer.itemSize = 3;
         	terrainVertexPositionBuffer.numItems = vertices.length / terrainVertexPositionBuffer.itemSize
@@ -136,6 +135,12 @@
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW)
 		terrainVertexColorBuffer.itemSize = 4;
 		terrainVertexColorBuffer.numItems = colors.length / terrainVertexColorBuffer.itemSize
+
+		terrainNormalVertexBuffer = gl.createBuffer()
+		gl.bindBuffer(gl.ARRAY_BUFFER, terrainNormalVertexBuffer)
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW)
+		terrainNormalVertexBuffer.itemSize = 3;
+		terrainNormalVertexBuffer.numItems = colors.length / terrainNormalVertexBuffer.itemSize
 	}
 
 	var position = {
