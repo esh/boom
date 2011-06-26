@@ -88,6 +88,7 @@
 	var cubeVertexIndexBuffer
 
 	var terrainVertexPositionBuffer
+	var terrainVertexColorBuffer
 
 	function initBuffers() {
 		terrainVertexPositionBuffer = gl.createBuffer()
@@ -96,20 +97,33 @@
 		var rows = 3
 		var cols = 3	
 		var vertices = new Array()
+		var colors = new Array();
 		for(var z = 0 ; z < rows ; z++) {
 			for(var x = 0 ; x < cols ; x++) {
 				vertices.push(x); vertices.push(0.0); vertices.push(z);
 				vertices.push(x); vertices.push(0.0); vertices.push(z + 1);
+
+				colors = colors.concat([1.0, 1.0, 1.0, 1.0])
+				colors = colors.concat([1.0, 1.0, 1.0, 1.0])
 			}
 			if(z < rows - 1) {
 				vertices.push(cols - 1); vertices.push(0.0); vertices.push(z + 1);
 				vertices.push(0); vertices.push(0.0); vertices.push(z + 1);
+
+				colors = colors.concat([1.0, 1.0, 1.0, 1.0])
+				colors = colors.concat([1.0, 1.0, 1.0, 1.0])
 			}
 		}
 
         	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
         	terrainVertexPositionBuffer.itemSize = 3;
         	terrainVertexPositionBuffer.numItems = vertices.length / terrainVertexPositionBuffer.itemSize
+
+		terrainVertexColorBuffer = gl.createBuffer()
+		gl.bindBuffer(gl.ARRAY_BUFFER, terrainVertexColorBuffer)
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW)
+		terrainVertexColorBuffer.itemSize = 4;
+		terrainVertexColorBuffer.numItems = colors.length / terrainVertexColorBuffer.itemSize
 
 
         cubeVertexPositionBuffer = gl.createBuffer();
@@ -237,12 +251,13 @@
 		mat4.rotate(mvMatrix, degToRad(-position.yaw), [0, 1, 0]);
 		mat4.translate(mvMatrix, [-position.x, -position.y, -position.z]);
 		
-
 		// terrain
 		mvPushMatrix(mvMatrix)
-		//mat4.translate(mvMatrix, [3.0, -1.0, -8.0]);
 		gl.bindBuffer(gl.ARRAY_BUFFER, terrainVertexPositionBuffer)
 		gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, terrainVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0)
+
+		gl.bindBuffer(gl.ARRAY_BUFFER, terrainVertexColorBuffer);
+		gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, terrainVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
 		setMatrixUniforms(pMatrix, mvMatrix)
 		gl.drawArrays(gl.TRIANGLE_STRIP, 0, terrainVertexPositionBuffer.numItems)
