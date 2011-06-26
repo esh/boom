@@ -91,12 +91,21 @@
         
 		var rows = 32 
 		var cols = 32 
+		var heightmap = new Array()
+		for(var z = 0 ; z < rows ; z++) {
+			var row = new Array()
+			for(var x = 0 ; x < cols ; x++) {
+				row.push(Math.round(Math.random()))	
+			}
+			heightmap.push(row)
+		}		
+
 		var vertices = new Array()
 		var colors = new Array();
 		for(var z = 0 ; z < rows ; z++) {
 			for(var x = 0 ; x < cols ; x++) {
-				vertices.push(x); vertices.push(0.0); vertices.push(z);
-				vertices.push(x); vertices.push(0.0); vertices.push(z + 1);
+				vertices.push(x); vertices.push(heightmap[x][z]); vertices.push(z);
+				vertices.push(x); vertices.push(heightmap[x][z + 1]); vertices.push(z + 1);
 
 				colors = colors.concat([1.0, 1.0, 1.0, 1.0])
 				colors = colors.concat([1.0, 1.0, 1.0, 1.0])
@@ -123,7 +132,7 @@
 
 	var position = {
 		x: 0,
-		y: 1,
+		y: 3,
 		z: 0,
 		yaw: 180,
 		pitch: 0,
