@@ -100,17 +100,12 @@
 	}
 	
 
-	var mvMatrix = mat4.create();
-	var pMatrix = mat4.create();
 
-	var terrainVertexPositionBuffer
-	var terrainVertexColorBuffer
-	var terrainVertexNormalBuffer
-
-	function initBuffers() {
+	var world
+	function initWorld() {
 		var rows = 40 
-		var cols = 40 
-		var world = new Array()
+		var cols = 40
+		world = new Array()
 		for(var x = 0 ; x < cols ; x++) {
 			var col = new Array()
 			for(var z = 0 ; z < rows ; z++) {
@@ -122,12 +117,21 @@
 			}
 			world.push(col)
 		}
+	}
 
+	var mvMatrix = mat4.create()
+	var pMatrix = mat4.create()
+
+	var terrainVertexPositionBuffer
+	var terrainVertexColorBuffer
+	var terrainVertexNormalBuffer
+
+	function initBuffers() {
 		var vertices = new Array()
 		var colors = new Array();
 		var normals = new Array();
-		for(var z = 0 ; z < rows - 1 ; z++) {
-			for(var x = 0 ; x < cols ; x++) {
+		for(var z = 0 ; z < world[0].length - 1 ; z++) {
+			for(var x = 0 ; x < world.length ; x++) {
 				vertices = vertices.concat([x, world[x][z].y, z])
 				vertices = vertices.concat([x, world[x][z + 1].y, z + 1])
 
@@ -137,8 +141,8 @@
 				normals = normals.concat(world[x][z].normal)
 				normals = normals.concat(world[x][z + 1].normal)
 			}
-			if(z < rows - 1) {
-				vertices = vertices.concat([cols - 1, world[cols - 1][z + 1].y, z + 1])
+			if(z < world[0].length - 1) {
+				vertices = vertices.concat([world.length - 1, world[world.length - 1][z + 1].y, z + 1])
 				vertices = vertices.concat([0, world[0][z + 1].y, z + 1])
 
 				colors = colors.concat([1.0, 1.0, 1.0, 1.0])
@@ -262,17 +266,18 @@
 	}
 
 	function webGLStart() {
-		var canvas = document.getElementById("canvas");
+		var canvas = document.getElementById("canvas")
 		canvas.width = $(document).width() 
 		canvas.height = $(document).height() 
-		initGL(canvas);
+		initGL(canvas)
+		initWorld()
 		initShaders()
-		initBuffers();
+		initBuffers()
 
-		gl.clearColor(0.0, 0.0, 0.0, 1.0);
-		gl.enable(gl.DEPTH_TEST);
+		gl.clearColor(0.0, 0.0, 0.0, 1.0)
+		gl.enable(gl.DEPTH_TEST)
 
-		tick();
+		tick()
 	}
 
 	document.onkeydown = handleKeyDown;
