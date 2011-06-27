@@ -75,21 +75,21 @@
 		}
 
 		function testBox() {
-			var box = (function() {
+			var box = (function(x, y, z) {
 				var masses = new Array()
 				var constraints = new Array()
 
 				// Front face
-				masses.push([-0.5, -0.5,  0.5]) // bottom left
-				masses.push([ 0.5, -0.5,  0.5]) // bottom right 
-				masses.push([ 0.5,  0.5,  0.5]) // top right
-				masses.push([-0.5,  0.5,  0.5]) // top left
+				masses.push([-0.5 + x, -0.5 + y,  0.5 + z]) // bottom left
+				masses.push([ 0.5 + x, -0.5 + y,  0.5 + z]) // bottom right 
+				masses.push([ 0.5 + x,  0.5 + y,  0.5 + z]) // top right
+				masses.push([-0.5 + x,  0.5 + y,  0.5 + z]) // top left
 
 				// Back face
-				masses.push([-0.5, -0.5, -0.5]) // bottom left
-				masses.push([ 0.5, -0.5, -0.5]) // bottom right 
-				masses.push([ 0.5,  0.5, -0.5]) // top right
-				masses.push([-0.5,  0.5, -0.5]) // top left
+				masses.push([-0.5 + x, -0.5 + y, -0.5 + z]) // bottom left
+				masses.push([ 0.5 + x, -0.5 + y, -0.5 + z]) // bottom right 
+				masses.push([ 0.5 + x,  0.5 + y, -0.5 + z]) // top right
+				masses.push([-0.5 + x,  0.5 + y, -0.5 + z]) // top left
 
 				return {
 					verletIntegrate: function() {
@@ -116,8 +116,8 @@
 */
 					}
 				}
-			})()
-			entities.push(box)
+			})
+			entities.push(box(0, 6, 0))
 		}
 
 		buildMap()
@@ -183,7 +183,6 @@
 	var terrainVertexPositionBuffer
 	var terrainVertexColorBuffer
 	var terrainVertexNormalBuffer
-
 
 	var cubeVertexPositionBuffer;
 	var cubeVertexColorBuffer
