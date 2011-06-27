@@ -53,29 +53,35 @@
 <script type="text/javascript">
 	var world = (function() {
 		var terrain = new Array()
+		var entities = new Array()
+
+		function buildMap() {
+			var stepSize = 4
+			var rows = 128 
+			var cols = 128 
+			for(var x = 0 ; x < cols ; x++) {
+				var col = new Array()
+				for(var z = 0 ; z < rows ; z++) {
+					var y = x > 0 && z > 0 ? ((col[z - 1].y + terrain[x - 1][z].y) / 2 + (Math.random() - 0.5) * stepSize) : 0
+					col.push({ x: x * stepSize,
+						   y: y, 
+						   z: z * stepSize,
+						   normal: x > 0 && z > 0 ?
+							normalize(crossProduct([1, y - terrain[x - 1][z].y, 0], [0, y - col[z - 1].y, 1])) :
+							[0.0, 1.0, 0.0] })
+				}
+				terrain.push(col)
+			}
+		}
 
 		return {
 			terrain: terrain,
 			init: function() {
-				var stepSize = 4
-				var rows = 128 
-				var cols = 128 
-				for(var x = 0 ; x < cols ; x++) {
-					var col = new Array()
-					for(var z = 0 ; z < rows ; z++) {
-						var y = x > 0 && z > 0 ? ((col[z - 1].y + terrain[x - 1][z].y) / 2 + (Math.random() - 0.5) * stepSize) : 0
-						col.push({ x: x * stepSize,
-							   y: y, 
-							   z: z * stepSize,
-							   normal: x > 0 && z > 0 ?
-								normalize(crossProduct([1, y - terrain[x - 1][z].y, 0], [0, y - col[z - 1].y, 1])) :
-								[0.0, 1.0, 0.0] })
-					}
-					terrain.push(col)
-				}
+				buildMap()
 			}
 		}
 	})()
+
 
 	var gl
 	var shaderProgram
