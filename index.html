@@ -103,15 +103,18 @@
 
 	var world
 	function initWorld() {
-		var rows = 64 
-		var cols = 64 
+		var stepSize = 4
+		var rows = 128 
+		var cols = 128 
 		world = new Array()
 		for(var x = 0 ; x < cols ; x++) {
 			var col = new Array()
 			for(var z = 0 ; z < rows ; z++) {
-				var y = x > 0 && z > 0 ? ((col[z - 1].y + world[x - 1][z].y) / 2 + Math.random() - 0.5) : 0
-				col.push({ y: y, 
-					  normal: x > 0 && z > 0 ?
+				var y = x > 0 && z > 0 ? ((col[z - 1].y + world[x - 1][z].y) / 2 + (Math.random() - 0.5) * stepSize) : 0
+				col.push({ x: x * stepSize,
+					   y: y, 
+					   z: z * stepSize,
+					   normal: x > 0 && z > 0 ?
 						normalize(crossProduct([1, y - world[x - 1][z].y, 0], [0, y - col[z - 1].y, 1])) :
 						[0.0, 1.0, 0.0] })
 			}
@@ -132,8 +135,8 @@
 		var normals = new Array()
 		for(var z = 0 ; z < world[0].length - 1 ; z++) {
 			for(var x = 0 ; x < world.length ; x++) {
-				vertices.push(x); vertices.push(world[x][z].y); vertices.push(z)
-				vertices.push(x); vertices.push(world[x][z + 1].y); vertices.push(z + 1)
+				vertices.push(world[x][z].x); vertices.push(world[x][z].y); vertices.push(world[x][z].z)
+				vertices.push(world[x][z].x); vertices.push(world[x][z + 1].y); vertices.push(world[x][z + 1].z)
 
 				colors.push(1.0); colors.push(1.0); colors.push(1.0); colors.push(1.0)
 				colors.push(1.0); colors.push(1.0); colors.push(1.0); colors.push(1.0)
@@ -146,8 +149,8 @@
 				}
 			}
 			if(z < world[0].length - 1) {
-				vertices.push(world.length - 1); vertices.push(world[world.length - 1][z + 1].y); vertices.push(z + 1)
-				vertices.push(0); vertices.push(world[0][z + 1].y); vertices.push(z + 1)
+				vertices.push(world[world.length - 1][0].x); vertices.push(world[world.length - 1][z + 1].y); vertices.push(world[world.length - 1][z + 1].z)
+				vertices.push(world[0][0].x); vertices.push(world[0][z + 1].y); vertices.push(world[0][z + 1].z)
 				
 				colors.push(1.0); colors.push(1.0); colors.push(1.0); colors.push(1.0)
 				colors.push(1.0); colors.push(1.0); colors.push(1.0); colors.push(1.0)
@@ -230,7 +233,10 @@
 		mat4.rotate(mvMatrix, degToRad(-position.pitch), [1, 0, 0]);
 		mat4.rotate(mvMatrix, degToRad(-position.yaw), [0, 1, 0]);
 		mat4.translate(mvMatrix, [-position.x, -position.y, -position.z]);
-		
+	
+		// entities
+
+	
 		// terrain
 		mvPushMatrix(mvMatrix)
 		gl.bindBuffer(gl.ARRAY_BUFFER, terrainVertexPositionBuffer)
