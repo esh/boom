@@ -74,6 +74,12 @@
 			}
 		}
 
+		function testBox() {
+			var box = {
+
+			}
+		}
+
 		return {
 			terrain: terrain,
 			init: function() {
@@ -88,10 +94,6 @@
 
 	var mvMatrix = mat4.create()
 	var pMatrix = mat4.create()
-
-	var terrainVertexPositionBuffer
-	var terrainVertexColorBuffer
-	var terrainVertexNormalBuffer
 
 	function initGL(canvas) {
 		try {
@@ -136,7 +138,18 @@
 		shaderProgram.lightingDirectionUniform = gl.getUniformLocation(shaderProgram, "uLightingDirection");
 		shaderProgram.directionalColorUniform = gl.getUniformLocation(shaderProgram, "uDirectionalColor");
 	}
-	
+
+	var terrainVertexPositionBuffer
+	var terrainVertexColorBuffer
+	var terrainVertexNormalBuffer
+
+
+	var cubeVertexPositionBuffer;
+	var cubeVertexColorBuffer
+	var cubeVertexNormalBuffer;
+	var cubeVertexIndexBuffer;
+
+
 	function initBuffers() {
 		var vertices = new Array()
 		var colors = new Array()
@@ -185,6 +198,140 @@
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW)
 		terrainVertexNormalBuffer.itemSize = 3;
 		terrainVertexNormalBuffer.numItems = normals.length / terrainVertexNormalBuffer.itemSize
+
+
+		cubeVertexPositionBuffer = gl.createBuffer();
+		gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
+		vertices = [
+		    // Front face
+		    -1.0, -1.0,  1.0,
+		     1.0, -1.0,  1.0,
+		     1.0,  1.0,  1.0,
+		    -1.0,  1.0,  1.0,
+
+		    // Back face
+		    -1.0, -1.0, -1.0,
+		    -1.0,  1.0, -1.0,
+		     1.0,  1.0, -1.0,
+		     1.0, -1.0, -1.0,
+
+		    // Top face
+		    -1.0,  1.0, -1.0,
+		    -1.0,  1.0,  1.0,
+		     1.0,  1.0,  1.0,
+		     1.0,  1.0, -1.0,
+
+		    // Bottom face
+		    -1.0, -1.0, -1.0,
+		     1.0, -1.0, -1.0,
+		     1.0, -1.0,  1.0,
+		    -1.0, -1.0,  1.0,
+
+		    // Right face
+		     1.0, -1.0, -1.0,
+		     1.0,  1.0, -1.0,
+		     1.0,  1.0,  1.0,
+		     1.0, -1.0,  1.0,
+
+		    // Left face
+		    -1.0, -1.0, -1.0,
+		    -1.0, -1.0,  1.0,
+		    -1.0,  1.0,  1.0,
+		    -1.0,  1.0, -1.0,
+		];
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+		cubeVertexPositionBuffer.itemSize = 3;
+		cubeVertexPositionBuffer.numItems = 24;
+
+		cubeVertexNormalBuffer = gl.createBuffer();
+		gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexNormalBuffer);
+		var vertexNormals = [
+		    // Front face
+		     0.0,  0.0,  1.0,
+		     0.0,  0.0,  1.0,
+		     0.0,  0.0,  1.0,
+		     0.0,  0.0,  1.0,
+
+		    // Back face
+		     0.0,  0.0, -1.0,
+		     0.0,  0.0, -1.0,
+		     0.0,  0.0, -1.0,
+		     0.0,  0.0, -1.0,
+
+		    // Top face
+		     0.0,  1.0,  0.0,
+		     0.0,  1.0,  0.0,
+		     0.0,  1.0,  0.0,
+		     0.0,  1.0,  0.0,
+
+		    // Bottom face
+		     0.0, -1.0,  0.0,
+		     0.0, -1.0,  0.0,
+		     0.0, -1.0,  0.0,
+		     0.0, -1.0,  0.0,
+
+		    // Right face
+		     1.0,  0.0,  0.0,
+		     1.0,  0.0,  0.0,
+		     1.0,  0.0,  0.0,
+		     1.0,  0.0,  0.0,
+
+		    // Left face
+		    -1.0,  0.0,  0.0,
+		    -1.0,  0.0,  0.0,
+		    -1.0,  0.0,  0.0,
+		    -1.0,  0.0,  0.0
+		];
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexNormals), gl.STATIC_DRAW);
+		cubeVertexNormalBuffer.itemSize = 3;
+		cubeVertexNormalBuffer.numItems = 24;
+
+		cubeVertexColorBuffer = gl.createBuffer();
+		gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexColorBuffer);
+		colors = [
+		    1.0, 0.0, 0.0, 1.0, // Front face
+		    1.0, 0.0, 0.0, 1.0, // Front face
+		    1.0, 0.0, 0.0, 1.0, // Front face
+		    1.0, 0.0, 0.0, 1.0, // Front face
+		    1.0, 1.0, 0.0, 1.0, // Back face
+		    1.0, 1.0, 0.0, 1.0, // Back face
+		    1.0, 1.0, 0.0, 1.0, // Back face
+		    1.0, 1.0, 0.0, 1.0, // Back face
+		    0.0, 1.0, 0.0, 1.0, // Top face
+		    0.0, 1.0, 0.0, 1.0, // Top face
+		    0.0, 1.0, 0.0, 1.0, // Top face
+		    0.0, 1.0, 0.0, 1.0, // Top face
+		    1.0, 0.5, 0.5, 1.0, // Bottom face
+		    1.0, 0.5, 0.5, 1.0, // Bottom face
+		    1.0, 0.5, 0.5, 1.0, // Bottom face
+		    1.0, 0.5, 0.5, 1.0, // Bottom face
+		    1.0, 0.0, 1.0, 1.0, // Right face
+		    1.0, 0.0, 1.0, 1.0, // Right face
+		    1.0, 0.0, 1.0, 1.0, // Right face
+		    1.0, 0.0, 1.0, 1.0, // Right face
+		    0.0, 0.0, 1.0, 1.0, // Left face
+		    0.0, 0.0, 1.0, 1.0, // Left face
+		    0.0, 0.0, 1.0, 1.0, // Left face
+		    0.0, 0.0, 1.0, 1.0  // Left face
+		]
+		
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
+		cubeVertexColorBuffer.itemSize = 4;
+		cubeVertexColorBuffer.numItems = 24;
+
+		cubeVertexIndexBuffer = gl.createBuffer();
+		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
+		var cubeVertexIndices = [
+		    0, 1, 2,      0, 2, 3,    // Front face
+		    4, 5, 6,      4, 6, 7,    // Back face
+		    8, 9, 10,     8, 10, 11,  // Top face
+		    12, 13, 14,   12, 14, 15, // Bottom face
+		    16, 17, 18,   16, 18, 19, // Right face
+		    20, 21, 22,   20, 22, 23  // Left face
+		];
+		gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(cubeVertexIndices), gl.STATIC_DRAW);
+		cubeVertexIndexBuffer.itemSize = 1;
+		cubeVertexIndexBuffer.numItems = 36;
 	}
 
 	var position = {
@@ -243,8 +390,26 @@
 		mat4.translate(mvMatrix, [-position.x, -position.y, -position.z]);
 	
 		// entities
+		mvPushMatrix(mvMatrix)
+		mat4.translate(mvMatrix, [5, 10, 5])
 
-	
+		gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
+		gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, cubeVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+		gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexColorBuffer);
+		gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, cubeVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0)
+
+		gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexNormalBuffer);
+		gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, cubeVertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+		gl.uniform3fv(shaderProgram.lightingDirectionUniform, [-0.25, -0.25, -0.5])
+		gl.uniform3f(shaderProgram.ambientColorUniform, 0.5, 0.5, 0.5)
+		gl.uniform3f(shaderProgram.directionalColorUniform, 0.5, 0.5, 0.5)
+
+		setMatrixUniforms()
+        	gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+		mvMatrix = mvPopMatrix()
+
 		// terrain
 		mvPushMatrix(mvMatrix)
 		gl.bindBuffer(gl.ARRAY_BUFFER, terrainVertexPositionBuffer)
