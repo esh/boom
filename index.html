@@ -75,16 +75,57 @@
 		}
 
 		function testBox() {
-			var box = {
+			var box = (function() {
+				var masses = new Array()
+				var constraints = new Array()
 
-			}
+				// Front face
+				masses.push([-0.5, -0.5,  0.5]) // bottom left
+				masses.push([ 0.5, -0.5,  0.5]) // bottom right 
+				masses.push([ 0.5,  0.5,  0.5]) // top right
+				masses.push([-0.5,  0.5,  0.5]) // top left
+
+				// Back face
+				masses.push([-0.5, -0.5, -0.5]) // bottom left
+				masses.push([ 0.5, -0.5, -0.5]) // bottom right 
+				masses.push([ 0.5,  0.5, -0.5]) // top right
+				masses.push([-0.5,  0.5, -0.5]) // top left
+
+				return {
+					verletIntegrate: function() {
+
+					},
+					satistifyConstraints: function() {
+
+					},
+					getPosition: function() {
+						var x = 0, y = 0, z = 0
+						for(var v = 0 ; v < masses.length ; v++) {
+							x += masses[v][0]
+							y += masses[v][1]
+							z += masses[v][2]
+						}
+						return [x / masses.length, y / masses.length, z / masses.length]
+					},
+					getRotation: function() {
+/*
+				    dirX.x, dirX.y, dirX.z, 0,
+				    dirY.x, dirY.y, dirY.z, 0,
+				    dirZ.x, dirZ.y, dirZ.z, 0,
+				    0,      0,      0,      1
+*/
+					}
+				}
+			})()
+			entities.push(box)
 		}
+
+		buildMap()
+		testBox()
 
 		return {
 			terrain: terrain,
-			init: function() {
-				buildMap()
-			}
+			entities: entities,
 		}
 	})()
 
@@ -204,41 +245,42 @@
 		gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
 		vertices = [
 		    // Front face
-		    -1.0, -1.0,  1.0,
-		     1.0, -1.0,  1.0,
-		     1.0,  1.0,  1.0,
-		    -1.0,  1.0,  1.0,
+		    -0.5, -0.5,  0.5,
+		     0.5, -0.5,  0.5,
+		     0.5,  0.5,  0.5,
+		    -0.5,  0.5,  0.5,
 
 		    // Back face
-		    -1.0, -1.0, -1.0,
-		    -1.0,  1.0, -1.0,
-		     1.0,  1.0, -1.0,
-		     1.0, -1.0, -1.0,
+		    -0.5, -0.5, -0.5,
+		    -0.5,  0.5, -0.5,
+		     0.5,  0.5, -0.5,
+		     0.5, -0.5, -0.5,
 
 		    // Top face
-		    -1.0,  1.0, -1.0,
-		    -1.0,  1.0,  1.0,
-		     1.0,  1.0,  1.0,
-		     1.0,  1.0, -1.0,
+		    -0.5,  0.5, -0.5,
+		    -0.5,  0.5,  0.5,
+		     0.5,  0.5,  0.5,
+		     0.5,  0.5, -0.5,
 
 		    // Bottom face
-		    -1.0, -1.0, -1.0,
-		     1.0, -1.0, -1.0,
-		     1.0, -1.0,  1.0,
-		    -1.0, -1.0,  1.0,
+		    -0.5, -0.5, -0.5,
+		     0.5, -0.5, -0.5,
+		     0.5, -0.5,  0.5,
+		    -0.5, -0.5,  0.5,
 
 		    // Right face
-		     1.0, -1.0, -1.0,
-		     1.0,  1.0, -1.0,
-		     1.0,  1.0,  1.0,
-		     1.0, -1.0,  1.0,
+		     0.5, -0.5, -0.5,
+		     0.5,  0.5, -0.5,
+		     0.5,  0.5,  0.5,
+		     0.5, -0.5,  0.5,
 
 		    // Left face
-		    -1.0, -1.0, -1.0,
-		    -1.0, -1.0,  1.0,
-		    -1.0,  1.0,  1.0,
-		    -1.0,  1.0, -1.0,
-		];
+		    -0.5, -0.5, -0.5,
+		    -0.5, -0.5,  0.5,
+		    -0.5,  0.5,  0.5,
+		    -0.5,  0.5, -0.5,
+		]
+
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
 		cubeVertexPositionBuffer.itemSize = 3;
 		cubeVertexPositionBuffer.numItems = 24;
@@ -390,25 +432,27 @@
 		mat4.translate(mvMatrix, [-position.x, -position.y, -position.z]);
 	
 		// entities
-		mvPushMatrix(mvMatrix)
-		mat4.translate(mvMatrix, [5, 10, 5])
+		for(var e = 0 ; e < world.entities.length ; e++) {
+			mvPushMatrix(mvMatrix)
+			mat4.translate(mvMatrix, world.entities[e].getPosition())
 
-		gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
-		gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, cubeVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+			gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
+			gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, cubeVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-		gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexColorBuffer);
-		gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, cubeVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0)
+			gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexColorBuffer);
+			gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, cubeVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0)
 
-		gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexNormalBuffer);
-		gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, cubeVertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
+			gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexNormalBuffer);
+			gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, cubeVertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-		gl.uniform3fv(shaderProgram.lightingDirectionUniform, [-0.25, -0.25, -0.5])
-		gl.uniform3f(shaderProgram.ambientColorUniform, 0.5, 0.5, 0.5)
-		gl.uniform3f(shaderProgram.directionalColorUniform, 0.5, 0.5, 0.5)
+			gl.uniform3fv(shaderProgram.lightingDirectionUniform, [-0.25, -0.25, -0.5])
+			gl.uniform3f(shaderProgram.ambientColorUniform, 0.5, 0.5, 0.5)
+			gl.uniform3f(shaderProgram.directionalColorUniform, 0.5, 0.5, 0.5)
 
-		setMatrixUniforms()
-        	gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
-		mvMatrix = mvPopMatrix()
+			setMatrixUniforms()
+			gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+			mvMatrix = mvPopMatrix()
+		}
 
 		// terrain
 		mvPushMatrix(mvMatrix)
@@ -453,7 +497,6 @@
 		canvas.height = $(document).height() 
 
 		initGL(canvas)
-		world.init()
 		initShaders()
 		initBuffers()
 		
