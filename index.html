@@ -108,12 +108,18 @@
 						return [x / masses.length, y / masses.length, z / masses.length]
 					},
 					getRotation: function() {
+						return [
 /*
-				    dirX.x, dirX.y, dirX.z, 0,
-				    dirY.x, dirY.y, dirY.z, 0,
-				    dirZ.x, dirZ.y, dirZ.z, 0,
-				    0,      0,      0,      1
+							dirX.x, dirX.y, dirX.z, 0,
+							dirY.x, dirY.y, dirY.z, 0,
+							dirZ.x, dirZ.y, dirZ.z, 0,
+							0,      0,      0,      1
 */
+							masses[0][0] - masses[1][0], masses[0][1] - masses[1][1], masses[0][2] - masses[1][2], 0,
+							masses[3][0] - masses[0][0], masses[3][1] - masses[0][1], masses[3][2] - masses[0][2], 0,
+							masses[4][0] - masses[0][0], masses[4][1] - masses[0][1], masses[4][2] - masses[0][2], 0,
+							0			   , 0,				  0,			       1
+						]
 					}
 				}
 			})
@@ -434,6 +440,7 @@
 		for(var e = 0 ; e < world.entities.length ; e++) {
 			mvPushMatrix(mvMatrix)
 			mat4.translate(mvMatrix, world.entities[e].getPosition())
+			mat4.multiply(mvMatrix, mat4.create(world.entities[e].getRotation()))
 
 			gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
 			gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, cubeVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
