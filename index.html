@@ -51,7 +51,41 @@
 
 
 <script type="text/javascript">
-	var gl;
+	var world = (function() {
+		var terrain = new Array()
+
+		return {
+			terrain: terrain,
+			init: function() {
+				var stepSize = 4
+				var rows = 128 
+				var cols = 128 
+				for(var x = 0 ; x < cols ; x++) {
+					var col = new Array()
+					for(var z = 0 ; z < rows ; z++) {
+						var y = x > 0 && z > 0 ? ((col[z - 1].y + terrain[x - 1][z].y) / 2 + (Math.random() - 0.5) * stepSize) : 0
+						col.push({ x: x * stepSize,
+							   y: y, 
+							   z: z * stepSize,
+							   normal: x > 0 && z > 0 ?
+								normalize(crossProduct([1, y - terrain[x - 1][z].y, 0], [0, y - col[z - 1].y, 1])) :
+								[0.0, 1.0, 0.0] })
+					}
+					terrain.push(col)
+				}
+			}
+		}
+	})()
+
+	var gl
+	var shaderProgram
+
+	var mvMatrix = mat4.create()
+	var pMatrix = mat4.create()
+
+	var terrainVertexPositionBuffer
+	var terrainVertexColorBuffer
+	var terrainVertexNormalBuffer
 
 	function initGL(canvas) {
 		try {
@@ -64,8 +98,6 @@
 		    alert("Could not initialise WebGL, sorry :-(");
 		}
 	}
-
-	var shaderProgram;
 
 	function initShaders() {
 		var fragmentShader = getShader(gl, "shader-fs");
@@ -99,58 +131,28 @@
 		shaderProgram.directionalColorUniform = gl.getUniformLocation(shaderProgram, "uDirectionalColor");
 	}
 	
-
-
-	var world
-	function initWorld() {
-		var stepSize = 4
-		var rows = 128 
-		var cols = 128 
-		world = new Array()
-		for(var x = 0 ; x < cols ; x++) {
-			var col = new Array()
-			for(var z = 0 ; z < rows ; z++) {
-				var y = x > 0 && z > 0 ? ((col[z - 1].y + world[x - 1][z].y) / 2 + (Math.random() - 0.5) * stepSize) : 0
-				col.push({ x: x * stepSize,
-					   y: y, 
-					   z: z * stepSize,
-					   normal: x > 0 && z > 0 ?
-						normalize(crossProduct([1, y - world[x - 1][z].y, 0], [0, y - col[z - 1].y, 1])) :
-						[0.0, 1.0, 0.0] })
-			}
-			world.push(col)
-		}
-	}
-
-	var mvMatrix = mat4.create()
-	var pMatrix = mat4.create()
-
-	var terrainVertexPositionBuffer
-	var terrainVertexColorBuffer
-	var terrainVertexNormalBuffer
-
 	function initBuffers() {
 		var vertices = new Array()
 		var colors = new Array()
 		var normals = new Array()
-		for(var z = 0 ; z < world[0].length - 1 ; z++) {
-			for(var x = 0 ; x < world.length ; x++) {
-				vertices.push(world[x][z].x); vertices.push(world[x][z].y); vertices.push(world[x][z].z)
-				vertices.push(world[x][z].x); vertices.push(world[x][z + 1].y); vertices.push(world[x][z + 1].z)
+		for(var z = 0 ; z < world.terrain[0].length - 1 ; z++) {
+			for(var x = 0 ; x < world.terrain.length ; x++) {
+				vertices.push(world.terrain[x][z].x); vertices.push(world.terrain[x][z].y); vertices.push(world.terrain[x][z].z)
+				vertices.push(world.terrain[x][z].x); vertices.push(world.terrain[x][z + 1].y); vertices.push(world.terrain[x][z + 1].z)
 
 				colors.push(1.0); colors.push(1.0); colors.push(1.0); colors.push(1.0)
 				colors.push(1.0); colors.push(1.0); colors.push(1.0); colors.push(1.0)
 	
 				for(var i = 0 ; i < 3 ; i ++) {
-					normals.push(world[x][z].normal[i])
+					normals.push(world.terrain[x][z].normal[i])
 				}
 				for(var i = 0 ; i < 3 ; i ++) {
-					normals.push(world[x][z + 1].normal[i])
+					normals.push(world.terrain[x][z + 1].normal[i])
 				}
 			}
-			if(z < world[0].length - 1) {
-				vertices.push(world[world.length - 1][0].x); vertices.push(world[world.length - 1][z + 1].y); vertices.push(world[world.length - 1][z + 1].z)
-				vertices.push(world[0][0].x); vertices.push(world[0][z + 1].y); vertices.push(world[0][z + 1].z)
+			if(z < world.terrain[0].length - 1) {
+				vertices.push(world.terrain[world.terrain.length - 1][0].x); vertices.push(world.terrain[world.terrain.length - 1][z + 1].y); vertices.push(world.terrain[world.terrain.length - 1][z + 1].z)
+				vertices.push(world.terrain[0][0].x); vertices.push(world.terrain[0][z + 1].y); vertices.push(world.terrain[0][z + 1].z)
 				
 				colors.push(1.0); colors.push(1.0); colors.push(1.0); colors.push(1.0)
 				colors.push(1.0); colors.push(1.0); colors.push(1.0); colors.push(1.0)
@@ -280,7 +282,7 @@
 		canvas.height = $(document).height() 
 
 		initGL(canvas)
-		initWorld()
+		world.init()
 		initShaders()
 		initBuffers()
 		
