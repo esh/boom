@@ -51,6 +51,8 @@
 
 
 <script type="text/javascript">
+	var deltaTime = 1 / 50 
+
 	var world = (function() {
 		var terrain = new Array()
 		var entities = new Array()
@@ -72,7 +74,7 @@
 			}
 		}
 
-		function applyForce(point, force, deltaTime) {
+		function applyForce(point, force) {
 			var a = vec3.scale(force, 1 / point.mass) 
 			var t = [point.now[0], point.now[1], point.now[2]]
 			point.now[0] = 2 * point.now[0] - point.prev[0] + a[0] * deltaTime * deltaTime 
@@ -132,16 +134,17 @@
 				return {
 					points: points,
 					constraints: constraints,
-					getPosition: function() {
+					getPosition: function(alpha) {
 						var x = 0, y = 0, z = 0
 						for(var v = 0 ; v < points.length ; v++) {
-							x += points[v].now[0]
-							y += points[v].now[1]
-							z += points[v].now[2]
+							x += points[v].now[0] * alpha + points[v].prev[0] * (1 - alpha)
+							y += points[v].now[1] * alpha + points[v].prev[1] * (1 - alpha)
+							z += points[v].now[2] * alpha + points[v].prev[2] * (1 - alpha)
 						}
 						return [x / points.length, y / points.length, z / points.length]
 					},
-					getRotation: function() {
+					getRotation: function(alpha) {
+						// todo: add interpolation to rotation
 						return [
 /*
 							dirX.x, dirX.y, dirX.z, 0,
@@ -163,7 +166,7 @@
 		buildMap()
 		testBox()
 
-		function tick(deltaTime) {
+		function tick() {
 			// gravity
 			for(var i = 0 ; i < entities.length ; i++) {
 				for(var j = 0 ; j < entities[i].points.length ; j++) {
@@ -486,7 +489,7 @@
 		return mvMatrixStack.pop();
 	}
 
-	function drawScene() {
+	function drawScene(alpha) {
 		gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
@@ -502,8 +505,8 @@
 		// entities
 		for(var e = 0 ; e < world.entities.length ; e++) {
 			mvPushMatrix()
-			mat4.translate(mvMatrix, world.entities[e].getPosition())
-			mat4.multiply(mvMatrix, mat4.create(world.entities[e].getRotation()))
+			mat4.translate(mvMatrix, world.entities[e].getPosition(alpha))
+			mat4.multiply(mvMatrix, mat4.create(world.entities[e].getRotation(alpha)))
 
 			gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
 			gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, cubeVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
@@ -543,19 +546,26 @@
 		mvMatrix = mvPopMatrix()
 	}
 
-	var lastTime = 0;
+	var currentTime = new Date().getTime() / 1000
+	var accumulator = deltaTime
 
 	function tick() {
 		requestAnimFrame(tick)
-		handleKeys()
-		drawScene()
 
-		var timeNow = new Date().getTime();
-		if (lastTime != 0) {
-			world.tick((timeNow - lastTime) / 1000)
+		var newTime = new Date().getTime() / 1000
+		var frameTime = Math.min(0.25, newTime - currentTime)
+		currentTime = newTime
+		accumulator += frameTime
+
+		while(accumulator >= deltaTime) {
+			world.tick()
+			accumulator -= deltaTime
 		}
-		lastTime = timeNow;
+				
+		var alpha = accumulator / deltaTime	
 
+		handleKeys()
+		drawScene(alpha)
 	}
 
 	function webGLStart() {
