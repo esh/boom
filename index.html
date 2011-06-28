@@ -56,10 +56,22 @@
 		var entities = new Array()
 
 		function satisfyConstraints(constraints) {
-			for(var i = 0 ; i < constraints.length ; i++) {
-				var delta = vec3.subtract(constraints[i].a, constraints[i].b)
-				var length = vec3.fastLength(delta)		
+			for(var i = 0 ; i < 10 ; i++) {
+				for(var j = 0 ; j < constraints.length ; j++) {
+					var delta = vec3.subtract(constraints[j].a, constraints[j].b)
+					var length = vec3.fastLength(delta)
+					if(length == constraints[j].length) {
+						return
+					}
+					vec3.scale(delta, (constraints[j].length - length) / constraints[j].length / 2, delta)
+					vec3.substract(constraints[i].a, delta, constraints[i].a)
+					vec3.add(constraints[i].b, delta, constraints[i].b)
+				}
 			}
+		}
+
+		function verletIntegrate(masses, force) {
+			//[0, -9.8, 0]
 		}
 
 		function buildMap() {
