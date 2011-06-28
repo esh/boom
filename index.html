@@ -422,6 +422,20 @@
 		gl.uniformMatrix3fv(shaderProgram.nMatrixUniform, false, normalMatrix);
 	}
 
+	var mvMatrixStack = []
+
+	function mvPushMatrix() {
+		var copy = mat4.create();
+		mat4.set(mvMatrix, copy);
+		mvMatrixStack.push(copy);
+	}
+
+	function mvPopMatrix() {
+		if (mvMatrixStack.length == 0) {
+		    throw "Invalid popMatrix!";
+		}
+		return mvMatrixStack.pop();
+	}
 
 	function drawScene() {
 		gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
@@ -438,7 +452,7 @@
 	
 		// entities
 		for(var e = 0 ; e < world.entities.length ; e++) {
-			mvPushMatrix(mvMatrix)
+			mvPushMatrix()
 			mat4.translate(mvMatrix, world.entities[e].getPosition())
 			mat4.multiply(mvMatrix, mat4.create(world.entities[e].getRotation()))
 
@@ -461,7 +475,7 @@
 		}
 
 		// terrain
-		mvPushMatrix(mvMatrix)
+		mvPushMatrix()
 		gl.bindBuffer(gl.ARRAY_BUFFER, terrainVertexPositionBuffer)
 		gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, terrainVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0)
 
