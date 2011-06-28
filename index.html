@@ -74,13 +74,16 @@
 			}
 		}
 
-		function applyForce(point, force) {
-			var a = vec3.scale(force, 1 / point.mass) 
-			var t = [point.now[0], point.now[1], point.now[2]]
-			point.now[0] = 2 * point.now[0] - point.prev[0] + a[0] * deltaTime * deltaTime 
-			point.now[1] = 2 * point.now[1] - point.prev[1] + a[1] * deltaTime * deltaTime 
-			point.now[2] = 2 * point.now[2] - point.prev[2] + a[2] * deltaTime * deltaTime
-			point.prev = t 
+		function verletIntegrate(entity) {
+			for(var i = 0 ; i < entity.points.length ; i++) {
+				var a = vec3.scale(entity.points[i].force, 1 / entity.points[i].mass) 
+				var t = [entity.points[i].now[0], entity.points[i].now[1], entity.points[i].now[2]]
+				entity.points[i].now[0] = 2 * entity.points[i].now[0] - entity.points[i].prev[0] + a[0] * deltaTime * deltaTime 
+				entity.points[i].now[1] = 2 * entity.points[i].now[1] - entity.points[i].prev[1] + a[1] * deltaTime * deltaTime 
+				entity.points[i].now[2] = 2 * entity.points[i].now[2] - entity.points[i].prev[2] + a[2] * deltaTime * deltaTime
+				entity.points[i].prev = t
+				entity.points[i].force = [0, 0, 0] 
+			}
 		}
 
 		function buildMap() {
@@ -106,17 +109,18 @@
 			var box = (function(x, y, z) {
 				var points = new Array()
 				var constraints = new Array()
+				var forces = [0, 0, 0] 
 
 				// Front face
-				points.push({mass: 1 / 8, now: [-0.5 + x, -0.5 + y,  0.5 + z], prev: [-0.5 + x, -0.5 + y,  0.5 + z]}) // bottom left
-				points.push({mass: 1 / 8, now: [ 0.5 + x, -0.5 + y,  0.5 + z], prev: [ 0.5 + x, -0.5 + y,  0.5 + z]}) // bottom right 
-				points.push({mass: 1 / 8, now: [ 0.5 + x,  0.5 + y,  0.5 + z], prev: [ 0.5 + x,  0.5 + y,  0.5 + z]}) // top right
-				points.push({mass: 1 / 8, now: [-0.5 + x,  0.5 + y,  0.5 + z], prev: [-0.5 + x,  0.5 + y,  0.5 + z]}) // top left
+				points.push({mass: 1 / 8, force: [0, 0, 0], now: [-0.5 + x, -0.5 + y,  0.5 + z], prev: [-0.5 + x, -0.5 + y,  0.5 + z]}) // bottom left
+				points.push({mass: 1 / 8, force: [0, 0, 0], now: [ 0.5 + x, -0.5 + y,  0.5 + z], prev: [ 0.5 + x, -0.5 + y,  0.5 + z]}) // bottom right 
+				points.push({mass: 1 / 8, force: [0, 0, 0], now: [ 0.5 + x,  0.5 + y,  0.5 + z], prev: [ 0.5 + x,  0.5 + y,  0.5 + z]}) // top right
+				points.push({mass: 1 / 8, force: [0, 0, 0], now: [-0.5 + x,  0.5 + y,  0.5 + z], prev: [-0.5 + x,  0.5 + y,  0.5 + z]}) // top left
 				// Back face
-				points.push({mass: 1 / 8, now: [-0.5 + x, -0.5 + y, -0.5 + z], prev: [-0.5 + x, -0.5 + y, -0.5 + z]}) // bottom left
-				points.push({mass: 1 / 8, now: [ 0.5 + x, -0.5 + y, -0.5 + z], prev: [ 0.5 + x, -0.5 + y, -0.5 + z]}) // bottom right 
-				points.push({mass: 1 / 8, now: [ 0.5 + x,  0.5 + y, -0.5 + z], prev: [ 0.5 + x,  0.5 + y, -0.5 + z]}) // top right
-				points.push({mass: 1 / 8, now: [-0.5 + x,  0.5 + y, -0.5 + z], prev: [-0.5 + x,  0.5 + y, -0.5 + z]}) // top left
+				points.push({mass: 1 / 8, force: [0, 0, 0], now: [-0.5 + x, -0.5 + y, -0.5 + z], prev: [-0.5 + x, -0.5 + y, -0.5 + z]}) // bottom left
+				points.push({mass: 1 / 8, force: [0, 0, 0], now: [ 0.5 + x, -0.5 + y, -0.5 + z], prev: [ 0.5 + x, -0.5 + y, -0.5 + z]}) // bottom right 
+				points.push({mass: 1 / 8, force: [0, 0, 0], now: [ 0.5 + x,  0.5 + y, -0.5 + z], prev: [ 0.5 + x,  0.5 + y, -0.5 + z]}) // top right
+				points.push({mass: 1 / 8, force: [0, 0, 0], now: [-0.5 + x,  0.5 + y, -0.5 + z], prev: [-0.5 + x,  0.5 + y, -0.5 + z]}) // top left
 
 				// build constraints
 				for(var i = 0 ; i < points.length ; i++) {
@@ -170,10 +174,13 @@
 			// gravity
 			for(var i = 0 ; i < entities.length ; i++) {
 				for(var j = 0 ; j < entities[i].points.length ; j++) {
-					applyForce(entities[i].points[j], [0, -9.8 * entities[i].points[j].mass, 0], deltaTime)
+					vec3.add(entities[i].points[j].force, [0, -9.8 * entities[i].points[j].mass, 0], entities[i].points[j].force)
 				}
 			}
 	
+			for(var i = 0 ; i < entities.length ; i++) {
+				verletIntegrate(entities[i], deltaTime)
+			}
 
 			for(var i = 0 ; i < entities.length ; i++) {
 				satisfyConstraints(entities[i])
