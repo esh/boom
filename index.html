@@ -55,6 +55,13 @@
 		var terrain = new Array()
 		var entities = new Array()
 
+		function satisfyConstraints(constraints) {
+			for(var i = 0 ; i < constraints.length ; i++) {
+				var delta = vec3.subtract(constraints[i].a, constraints[i].b)
+				var length = vec3.fastLength(delta)		
+			}
+		}
+
 		function buildMap() {
 			var stepSize = 4
 			var rows = 128 
@@ -91,13 +98,22 @@
 				masses.push([ 0.5 + x,  0.5 + y, -0.5 + z]) // top right
 				masses.push([-0.5 + x,  0.5 + y, -0.5 + z]) // top left
 
+				// build constraints
+				for(var i = 0 ; i < masses.length ; i++) {
+					for(var j = 0 ; j < masses.length ; j++) {
+						if(i != j) {
+							constraints.push({
+								a: masses[i],
+								b: masses[j],
+								length: vec3.length(vec3.subtract(masses[i], masses[j]))
+							})
+						}
+					}
+				}
+
 				return {
-					verletIntegrate: function() {
-
-					},
-					satistifyConstraints: function() {
-
-					},
+					masses: masses,
+					constraints: constraints,
 					getPosition: function() {
 						var x = 0, y = 0, z = 0
 						for(var v = 0 ; v < masses.length ; v++) {
@@ -129,9 +145,16 @@
 		buildMap()
 		testBox()
 
+		function tick() {
+			for(var i = 0 ; i < entities.length ; i++) {
+				satisfyConstraints(entities[i])
+			}
+		}
+
 		return {
 			terrain: terrain,
 			entities: entities,
+			tick: tick
 		}
 	})()
 
@@ -496,19 +519,18 @@
 
 	var lastTime = 0;
 
-	function animate() {
+	function tick() {
+		requestAnimFrame(tick)
+		handleKeys()
+		drawScene()
+
 		var timeNow = new Date().getTime();
 		if (lastTime != 0) {
 			var elapsed = timeNow - lastTime;
 		}
 		lastTime = timeNow;
-	}
 
-	function tick() {
-		requestAnimFrame(tick)
-		handleKeys()
-		drawScene()
-		animate()
+		world.tick()
 	}
 
 	function webGLStart() {
