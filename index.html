@@ -72,14 +72,13 @@
 			}
 		}
 
-		function applyForce(mass, force, deltaTime) {
-/*
-			f = ma
-			a = f / m 
-			x` = 2x - x* + a * t^2
-			x* = x
-			return x`  
-*/
+		function applyForce(point, force, deltaTime) {
+			var a = vec3.scale(force, 1 / point.mass) 
+			var t = [point.now[0], point.now[1], point.now[2]]
+			point.now[0] = 2 * point.now[0] - point.prev[0] + a[0] * deltaTime * deltaTime 
+			point.now[1] = 2 * point.now[1] - point.prev[1] + a[1] * deltaTime * deltaTime 
+			point.now[2] = 2 * point.now[2] - point.prev[2] + a[2] * deltaTime * deltaTime
+			point.prev = t 
 		}
 
 		function buildMap() {
@@ -103,44 +102,44 @@
 
 		function testBox() {
 			var box = (function(x, y, z) {
-				var masses = new Array()
+				var points = new Array()
 				var constraints = new Array()
 
 				// Front face
-				masses.push({now: [-0.5 + x, -0.5 + y,  0.5 + z], prev: [-0.5 + x, -0.5 + y,  0.5 + z]}) // bottom left
-				masses.push({now: [ 0.5 + x, -0.5 + y,  0.5 + z], prev: [ 0.5 + x, -0.5 + y,  0.5 + z]}) // bottom right 
-				masses.push({now: [ 0.5 + x,  0.5 + y,  0.5 + z], prev: [ 0.5 + x,  0.5 + y,  0.5 + z]}) // top right
-				masses.push({now: [-0.5 + x,  0.5 + y,  0.5 + z], prev: [-0.5 + x,  0.5 + y,  0.5 + z]}) // top left
+				points.push({mass: 1 / 8, now: [-0.5 + x, -0.5 + y,  0.5 + z], prev: [-0.5 + x, -0.5 + y,  0.5 + z]}) // bottom left
+				points.push({mass: 1 / 8, now: [ 0.5 + x, -0.5 + y,  0.5 + z], prev: [ 0.5 + x, -0.5 + y,  0.5 + z]}) // bottom right 
+				points.push({mass: 1 / 8, now: [ 0.5 + x,  0.5 + y,  0.5 + z], prev: [ 0.5 + x,  0.5 + y,  0.5 + z]}) // top right
+				points.push({mass: 1 / 8, now: [-0.5 + x,  0.5 + y,  0.5 + z], prev: [-0.5 + x,  0.5 + y,  0.5 + z]}) // top left
 				// Back face
-				masses.push({now: [-0.5 + x, -0.5 + y, -0.5 + z], prev: [-0.5 + x, -0.5 + y, -0.5 + z]}) // bottom left
-				masses.push({now: [ 0.5 + x, -0.5 + y, -0.5 + z], prev: [ 0.5 + x, -0.5 + y, -0.5 + z]}) // bottom right 
-				masses.push({now: [ 0.5 + x,  0.5 + y, -0.5 + z], prev: [ 0.5 + x,  0.5 + y, -0.5 + z]}) // top right
-				masses.push({now: [-0.5 + x,  0.5 + y, -0.5 + z], prev: [-0.5 + x,  0.5 + y, -0.5 + z]}) // top left
+				points.push({mass: 1 / 8, now: [-0.5 + x, -0.5 + y, -0.5 + z], prev: [-0.5 + x, -0.5 + y, -0.5 + z]}) // bottom left
+				points.push({mass: 1 / 8, now: [ 0.5 + x, -0.5 + y, -0.5 + z], prev: [ 0.5 + x, -0.5 + y, -0.5 + z]}) // bottom right 
+				points.push({mass: 1 / 8, now: [ 0.5 + x,  0.5 + y, -0.5 + z], prev: [ 0.5 + x,  0.5 + y, -0.5 + z]}) // top right
+				points.push({mass: 1 / 8, now: [-0.5 + x,  0.5 + y, -0.5 + z], prev: [-0.5 + x,  0.5 + y, -0.5 + z]}) // top left
 
 				// build constraints
-				for(var i = 0 ; i < masses.length ; i++) {
-					for(var j = 0 ; j < masses.length ; j++) {
+				for(var i = 0 ; i < points.length ; i++) {
+					for(var j = 0 ; j < points.length ; j++) {
 						if(i != j) {
 							constraints.push({
-								a: masses[i],
-								b: masses[j],
-								length: vec3.length(vec3.subtract(masses[i].now, masses[j].now))
+								a: points[i],
+								b: points[j],
+								length: vec3.length(vec3.subtract(points[i].now, points[j].now))
 							})
 						}
 					}
 				}
 
 				return {
-					masses: masses,
+					points: points,
 					constraints: constraints,
 					getPosition: function() {
 						var x = 0, y = 0, z = 0
-						for(var v = 0 ; v < masses.length ; v++) {
-							x += masses[v].now[0]
-							y += masses[v].now[1]
-							z += masses[v].now[2]
+						for(var v = 0 ; v < points.length ; v++) {
+							x += points[v].now[0]
+							y += points[v].now[1]
+							z += points[v].now[2]
 						}
-						return [x / masses.length, y / masses.length, z / masses.length]
+						return [x / points.length, y / points.length, z / points.length]
 					},
 					getRotation: function() {
 						return [
@@ -150,9 +149,9 @@
 							dirZ.x, dirZ.y, dirZ.z, 0,
 							0,      0,      0,      1
 */
-							masses[0].now[0] - masses[1].now[0], masses[0].now[1] - masses[1].now[1], masses[0].now[2] - masses[1].now[2], 0,
-							masses[3].now[0] - masses[0].now[0], masses[3].now[1] - masses[0].now[1], masses[3].now[2] - masses[0].now[2], 0,
-							masses[4].now[0] - masses[0].now[0], masses[4].now[1] - masses[0].now[1], masses[4].now[2] - masses[0].now[2], 0,
+							points[0].now[0] - points[1].now[0], points[0].now[1] - points[1].now[1], points[0].now[2] - points[1].now[2], 0,
+							points[3].now[0] - points[0].now[0], points[3].now[1] - points[0].now[1], points[3].now[2] - points[0].now[2], 0,
+							points[4].now[0] - points[0].now[0], points[4].now[1] - points[0].now[1], points[4].now[2] - points[0].now[2], 0,
 							0				   , 0					, 0				     , 1
 						]
 					}
@@ -165,6 +164,14 @@
 		testBox()
 
 		function tick(deltaTime) {
+			// gravity
+			for(var i = 0 ; i < entities.length ; i++) {
+				for(var j = 0 ; j < entities[i].points.length ; j++) {
+					applyForce(entities[i].points[j], [0, -9.8 * entities[i].points[j].mass, 0], deltaTime)
+				}
+			}
+	
+
 			for(var i = 0 ; i < entities.length ; i++) {
 				satisfyConstraints(entities[i])
 			}
@@ -545,7 +552,7 @@
 
 		var timeNow = new Date().getTime();
 		if (lastTime != 0) {
-			world.tick(timeNow - lastTime)
+			world.tick((timeNow - lastTime) / 1000)
 		}
 		lastTime = timeNow;
 
