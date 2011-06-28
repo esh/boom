@@ -64,14 +64,15 @@
 						return
 					}
 					vec3.scale(delta, (constraints[j].length - length) / constraints[j].length / 2, delta)
-					vec3.substract(constraints[i].a, delta, constraints[i].a)
-					vec3.add(constraints[i].b, delta, constraints[i].b)
+					vec3.substract(constraints[i].a.now, delta, constraints[i].a.now)
+					vec3.substract(constraints[i].a.prev, delta, constraints[i].a.prev)
+					vec3.add(constraints[i].b.now, delta, constraints[i].b.now)
+					vec3.add(constraints[i].b.prev, delta, constraints[i].b.prev)
 				}
 			}
 		}
 
-		function verletIntegrate(masses, force) {
-			//[0, -9.8, 0]
+		function applyForce(masses, force, deltaTime) {
 		}
 
 		function buildMap() {
@@ -99,16 +100,15 @@
 				var constraints = new Array()
 
 				// Front face
-				masses.push([-0.5 + x, -0.5 + y,  0.5 + z]) // bottom left
-				masses.push([ 0.5 + x, -0.5 + y,  0.5 + z]) // bottom right 
-				masses.push([ 0.5 + x,  0.5 + y,  0.5 + z]) // top right
-				masses.push([-0.5 + x,  0.5 + y,  0.5 + z]) // top left
-
+				masses.push({now: [-0.5 + x, -0.5 + y,  0.5 + z], prev: [-0.5 + x, -0.5 + y,  0.5 + z]}) // bottom left
+				masses.push({now: [ 0.5 + x, -0.5 + y,  0.5 + z], prev: [ 0.5 + x, -0.5 + y,  0.5 + z]}) // bottom right 
+				masses.push({now: [ 0.5 + x,  0.5 + y,  0.5 + z], prev: [ 0.5 + x,  0.5 + y,  0.5 + z]}) // top right
+				masses.push({now: [-0.5 + x,  0.5 + y,  0.5 + z], prev: [-0.5 + x,  0.5 + y,  0.5 + z]}) // top left
 				// Back face
-				masses.push([-0.5 + x, -0.5 + y, -0.5 + z]) // bottom left
-				masses.push([ 0.5 + x, -0.5 + y, -0.5 + z]) // bottom right 
-				masses.push([ 0.5 + x,  0.5 + y, -0.5 + z]) // top right
-				masses.push([-0.5 + x,  0.5 + y, -0.5 + z]) // top left
+				masses.push({now: [-0.5 + x, -0.5 + y, -0.5 + z], prev: [-0.5 + x, -0.5 + y, -0.5 + z]}) // bottom left
+				masses.push({now: [ 0.5 + x, -0.5 + y, -0.5 + z], prev: [ 0.5 + x, -0.5 + y, -0.5 + z]}) // bottom right 
+				masses.push({now: [ 0.5 + x,  0.5 + y, -0.5 + z], prev: [ 0.5 + x,  0.5 + y, -0.5 + z]}) // top right
+				masses.push({now: [-0.5 + x,  0.5 + y, -0.5 + z], prev: [-0.5 + x,  0.5 + y, -0.5 + z]}) // top left
 
 				// build constraints
 				for(var i = 0 ; i < masses.length ; i++) {
@@ -117,7 +117,7 @@
 							constraints.push({
 								a: masses[i],
 								b: masses[j],
-								length: vec3.length(vec3.subtract(masses[i], masses[j]))
+								length: vec3.length(vec3.subtract(masses[i].now, masses[j].now))
 							})
 						}
 					}
@@ -129,9 +129,9 @@
 					getPosition: function() {
 						var x = 0, y = 0, z = 0
 						for(var v = 0 ; v < masses.length ; v++) {
-							x += masses[v][0]
-							y += masses[v][1]
-							z += masses[v][2]
+							x += masses[v].now[0]
+							y += masses[v].now[1]
+							z += masses[v].now[2]
 						}
 						return [x / masses.length, y / masses.length, z / masses.length]
 					},
@@ -143,10 +143,10 @@
 							dirZ.x, dirZ.y, dirZ.z, 0,
 							0,      0,      0,      1
 */
-							masses[0][0] - masses[1][0], masses[0][1] - masses[1][1], masses[0][2] - masses[1][2], 0,
-							masses[3][0] - masses[0][0], masses[3][1] - masses[0][1], masses[3][2] - masses[0][2], 0,
-							masses[4][0] - masses[0][0], masses[4][1] - masses[0][1], masses[4][2] - masses[0][2], 0,
-							0			   , 0,				  0,			       1
+							masses[0].now[0] - masses[1].now[0], masses[0].now[1] - masses[1].now[1], masses[0].now[2] - masses[1].now[2], 0,
+							masses[3].now[0] - masses[0].now[0], masses[3].now[1] - masses[0].now[1], masses[3].now[2] - masses[0].now[2], 0,
+							masses[4].now[0] - masses[0].now[0], masses[4].now[1] - masses[0].now[1], masses[4].now[2] - masses[0].now[2], 0,
+							0				   , 0					, 0				     , 1
 						]
 					}
 				}
@@ -157,7 +157,7 @@
 		buildMap()
 		testBox()
 
-		function tick() {
+		function tick(deltaTime) {
 			for(var i = 0 ; i < entities.length ; i++) {
 				satisfyConstraints(entities[i])
 			}
@@ -538,11 +538,10 @@
 
 		var timeNow = new Date().getTime();
 		if (lastTime != 0) {
-			var elapsed = timeNow - lastTime;
+			world.tick(timeNow - lastTime)
 		}
 		lastTime = timeNow;
 
-		world.tick()
 	}
 
 	function webGLStart() {
