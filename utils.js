@@ -36,13 +36,3 @@ function getShader(gl, id) {
 function degToRad(degrees) {
 	return degrees * Math.PI / 180;
 }
-
-function fastSqrt(number) {
-	var x = number; 
-	while (Math.abs(x*x-number) > 0.001) x = (x*x+number)/(2*x)
-        return x
-}
-
-function fastLength(v) {
-	return fastSqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2])	
-}
