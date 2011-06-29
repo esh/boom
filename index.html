@@ -5,9 +5,9 @@
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 
 <script type="text/javascript" src="jquery-1.4.2.min.js"></script>
-<script type="text/javascript" src="glMatrix-0.9.5.min.js"></script>
+<script type="text/javascript" src="glMatrix.js"></script>
 <script type="text/javascript" src="webgl-utils.js"></script>
-<script type="text/javascript" src="utils.js?v=1"></script>
+<script type="text/javascript" src="utils.js"></script>
 <script type="text/javascript" src="input.js"></script>
 
 <script id="shader-fs" type="x-shader/x-fragment">
@@ -57,31 +57,27 @@
 		var terrain = new Array()
 		var entities = new Array()
 
-		function project(point) {
-			if(point.now[1] <= 0) {
-				var delta = 0 - point.now[1]
-				point.now[1] += delta
-				//point.prev[1] += delta
-			}
-		}
-
-		function satisfyConstraints(constraints) {
+		function satisfyConstraints(entity) {
 			for(var i = 0 ; i < 10 ; i++) {
-				for(var j = 0 ; j < constraints.length ; j++) {
-					// relax
+				// relax
+				for(var j = 0 ; j < entity.constraints.length ; j++) {
 					var delta = vec3.create()
-					vec3.subtract(constraints[j].a.now, constraints[j].b.now, delta)
-					var deltaLength = vec3.fastLength(delta)
-					var diff = (deltaLength - constraints[j].length) / deltaLength
+					vec3.subtract(entity.constraints[j].a.now, entity.constraints[j].b.now, delta)
+					var deltaLength = vec3.length(delta)
+					var diff = (deltaLength - entity.constraints[j].length) / deltaLength
 					vec3.scale(delta, diff / 2, delta)
-					vec3.subtract(constraints[j].a.now, delta, constraints[j].a.now)
-					//vec3.subtract(constraints[j].a.prev, delta, constraints[j].a.prev)
-					vec3.add(constraints[j].b.now, delta, constraints[j].b.now)
-					//vec3.add(constraints[j].b.prev, delta, constraints[j].b.prev)
+					vec3.subtract(entity.constraints[j].a.now, delta, entity.constraints[j].a.now)
+					vec3.subtract(entity.constraints[j].a.prev, delta, entity.constraints[j].a.prev)
+					vec3.add(entity.constraints[j].b.now, delta, entity.constraints[j].b.now)
+					vec3.add(entity.constraints[j].b.prev, delta, entity.constraints[j].b.prev)
+				}
 
-					// project
-					project(constraints[j].a)
-					project(constraints[j].b)
+				// project
+				for(var j = 0 ; j < entity.points.length ; j++) {
+					if(entity.points[j].now[1] < 0) {
+						entity.points[j].prev[1] = 0
+						entity.points[j].now[1] = 0
+					}
 				}
 			}
 		}
@@ -141,7 +137,7 @@
 							constraints.push({
 								a: points[i],
 								b: points[j],
-								length: vec3.length(vec3.subtract(points[i].now, points[j].now))
+								length: vec3.length([points[i].now[0] - points[j].now[0],points[i].now[1] - points[j].now[1], points[i].now[2] - points[j].now[2]])
 							})
 						}
 					}
@@ -189,10 +185,12 @@
 					entities[i].points[j].force = [0, -9.8 * entities[i].points[j].mass, 0]
 
 					// apply normal force
-					if(entities[i].points[j].now[1] <= 0) {
-						var a = vec3.scale(vec3.subtract(entities[i].points[j].now, entities[i].points[j].prev), 1 / deltaTime / deltaTime)
+					if(entities[i].points[j].now[1] < 0) {
+						var a = vec3.create()
+						vec3.subtract(entities[i].points[j].now, entities[i].points[j].prev, a)
+						vec3.scale(a, 1 / deltaTime / deltaTime)
 						var f = vec3.scale(a, entities[i].points[j].mass)
-						f[1] *= -1
+						f[1] *= -0.9
 						entities[i].points[j].force = vec3.add(entities[i].points[j].force, f)
 					}
 				}
@@ -203,7 +201,7 @@
 			}
 
 			for(var i = 0 ; i < entities.length ; i++) {
-				satisfyConstraints(entities[i].constraints)
+				satisfyConstraints(entities[i])
 			}
 		}
 
