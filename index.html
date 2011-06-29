@@ -61,11 +61,9 @@
 			for(var i = 0 ; i < 10 ; i++) {
 				for(var j = 0 ; j < constraints.length ; j++) {
 					var delta = vec3.subtract(constraints[j].a, constraints[j].b)
-					var length = vec3.fastLength(delta)
-					if(length == constraints[j].length) {
-						return
-					}
-					vec3.scale(delta, (constraints[j].length - length) / constraints[j].length / 2, delta)
+					var deltaLength = vec3.fastLength(delta)
+					var diff = vec3.substract(deltaLength, constraints[j].length)
+					vec3.scale(diff, deltaLength / 2, diff)	
 					vec3.substract(constraints[i].a.now, delta, constraints[i].a.now)
 					vec3.substract(constraints[i].a.prev, delta, constraints[i].a.prev)
 					vec3.add(constraints[i].b.now, delta, constraints[i].b.now)
@@ -171,10 +169,14 @@
 		testBox()
 
 		function tick() {
-			// gravity
 			for(var i = 0 ; i < entities.length ; i++) {
 				for(var j = 0 ; j < entities[i].points.length ; j++) {
+					// accumulate forces - gravity 
 					vec3.add(entities[i].points[j].force, [0, -9.8 * entities[i].points[j].mass, 0], entities[i].points[j].force)
+
+					// apply normal force
+					if(entities[i].points[j].now[1] <= 0) {
+					}
 				}
 			}
 	
