@@ -61,6 +61,7 @@
 			if(point.now[1] <= 0) {
 				var delta = 0 - point.now[1]
 				point.now[1] += delta
+				//point.prev[1] += delta
 			}
 		}
 
@@ -68,12 +69,15 @@
 			for(var i = 0 ; i < 10 ; i++) {
 				for(var j = 0 ; j < constraints.length ; j++) {
 					// relax
-					var delta = vec3.subtract(constraints[j].a.now, constraints[j].b.now)
+					var delta = vec3.create()
+					vec3.subtract(constraints[j].a.now, constraints[j].b.now, delta)
 					var deltaLength = vec3.fastLength(delta)
 					var diff = (deltaLength - constraints[j].length) / deltaLength
 					vec3.scale(delta, diff / 2, delta)
 					vec3.subtract(constraints[j].a.now, delta, constraints[j].a.now)
+					//vec3.subtract(constraints[j].a.prev, delta, constraints[j].a.prev)
 					vec3.add(constraints[j].b.now, delta, constraints[j].b.now)
+					//vec3.add(constraints[j].b.prev, delta, constraints[j].b.prev)
 
 					// project
 					project(constraints[j].a)
