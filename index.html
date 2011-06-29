@@ -75,8 +75,9 @@
 				// project
 				for(var j = 0 ; j < entity.points.length ; j++) {
 					if(entity.points[j].now[1] < 0) {
-						entity.points[j].prev[1] = 0
+						var delta = 0 - entity.points[j].now[1]
 						entity.points[j].now[1] = 0
+						entity.points[j].prev[1] += delta
 					}
 				}
 			}
@@ -114,6 +115,38 @@
 		}
 
 		function testBox() {
+			var ball= (function(x, y, z) {
+				var points = new Array()
+				var constraints = new Array()
+				var forces = [0, 0, 0] 
+
+				points.push({mass: 1, force: [0, 0, 0], now: [x, y, z], prev: [x, y, z]})
+			
+				return {
+					points: points,
+					constraints: constraints,
+					getPosition: function(alpha) {
+						var x = 0, y = 0, z = 0
+						for(var v = 0 ; v < points.length ; v++) {
+							x += points[v].now[0] * alpha + points[v].prev[0] * (1 - alpha)
+							y += points[v].now[1] * alpha + points[v].prev[1] * (1 - alpha)
+							z += points[v].now[2] * alpha + points[v].prev[2] * (1 - alpha)
+						}
+						return [x / points.length, y / points.length, z / points.length]
+					},
+					getRotation: function(alpha) {
+						// todo: add interpolation to rotation
+						return [
+							1,	0,	0,	0,
+							0,	1, 	0,	0,
+							0, 	0, 	1, 	0,
+							0,      0,      0,      1
+						]
+					}
+				}
+			})
+			entities.push(ball(0, 6, 0))
+			
 			var box = (function(x, y, z) {
 				var points = new Array()
 				var constraints = new Array()
@@ -172,7 +205,7 @@
 					}
 				}
 			})
-			entities.push(box(0, 6, 0))
+			//entities.push(box(0, 6, 0))
 		}
 
 		buildMap()
@@ -185,13 +218,13 @@
 					entities[i].points[j].force = [0, -9.8 * entities[i].points[j].mass, 0]
 
 					// apply normal force
-					if(entities[i].points[j].now[1] < 0) {
+					if(entities[i].points[j].now[1] <= 0) {
 						var a = vec3.create()
 						vec3.subtract(entities[i].points[j].now, entities[i].points[j].prev, a)
 						vec3.scale(a, 1 / deltaTime / deltaTime)
 						var f = vec3.scale(a, entities[i].points[j].mass)
 						f[1] *= -0.9
-						entities[i].points[j].force = vec3.add(entities[i].points[j].force, f)
+						vec3.add(entities[i].points[j].force, f, entities[i].points[j].force)
 					}
 				}
 			}
