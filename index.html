@@ -223,8 +223,10 @@
 						vec3.subtract(entities[i].points[j].now, entities[i].points[j].prev, a)
 						vec3.scale(a, 1 / deltaTime / deltaTime)
 						var f = vec3.scale(a, entities[i].points[j].mass)
-						f[1] *= -0.9
+						f[1] *= -0.8
 						vec3.add(entities[i].points[j].force, f, entities[i].points[j].force)
+
+						entities[i].points[j].prev[1] = 0
 					}
 				}
 			}
