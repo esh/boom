@@ -57,17 +57,27 @@
 		var terrain = new Array()
 		var entities = new Array()
 
+		function project(point) {
+			if(point.now[1] <= 0) {
+				var delta = 0 - point.now[1]
+				point.now[1] += delta
+			}
+		}
+
 		function satisfyConstraints(constraints) {
 			for(var i = 0 ; i < 10 ; i++) {
 				for(var j = 0 ; j < constraints.length ; j++) {
-					var delta = vec3.subtract(constraints[j].a, constraints[j].b)
+					// relax
+					var delta = vec3.subtract(constraints[j].a.now, constraints[j].b.now)
 					var deltaLength = vec3.fastLength(delta)
-					var diff = vec3.substract(deltaLength, constraints[j].length)
-					vec3.scale(diff, deltaLength / 2, diff)	
-					vec3.substract(constraints[i].a.now, delta, constraints[i].a.now)
-					vec3.substract(constraints[i].a.prev, delta, constraints[i].a.prev)
-					vec3.add(constraints[i].b.now, delta, constraints[i].b.now)
-					vec3.add(constraints[i].b.prev, delta, constraints[i].b.prev)
+					var diff = (deltaLength - constraints[j].length) / deltaLength
+					vec3.scale(delta, diff / 2, delta)
+					vec3.subtract(constraints[j].a.now, delta, constraints[j].a.now)
+					vec3.add(constraints[j].b.now, delta, constraints[j].b.now)
+
+					// project
+					project(constraints[j].a)
+					project(constraints[j].b)
 				}
 			}
 		}
@@ -172,10 +182,14 @@
 			for(var i = 0 ; i < entities.length ; i++) {
 				for(var j = 0 ; j < entities[i].points.length ; j++) {
 					// accumulate forces - gravity 
-					vec3.add(entities[i].points[j].force, [0, -9.8 * entities[i].points[j].mass, 0], entities[i].points[j].force)
+					entities[i].points[j].force = [0, -9.8 * entities[i].points[j].mass, 0]
 
 					// apply normal force
 					if(entities[i].points[j].now[1] <= 0) {
+						var a = vec3.scale(vec3.subtract(entities[i].points[j].now, entities[i].points[j].prev), 1 / deltaTime / deltaTime)
+						var f = vec3.scale(a, entities[i].points[j].mass)
+						f[1] *= -1
+						entities[i].points[j].force = vec3.add(entities[i].points[j].force, f)
 					}
 				}
 			}
@@ -185,7 +199,7 @@
 			}
 
 			for(var i = 0 ; i < entities.length ; i++) {
-				satisfyConstraints(entities[i])
+				satisfyConstraints(entities[i].constraints)
 			}
 		}
 
