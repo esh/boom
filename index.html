@@ -67,17 +67,14 @@
 					var diff = (deltaLength - entity.constraints[j].length) / deltaLength
 					vec3.scale(delta, diff / 2, delta)
 					vec3.subtract(entity.constraints[j].a.now, delta, entity.constraints[j].a.now)
-					vec3.subtract(entity.constraints[j].a.prev, delta, entity.constraints[j].a.prev)
 					vec3.add(entity.constraints[j].b.now, delta, entity.constraints[j].b.now)
-					vec3.add(entity.constraints[j].b.prev, delta, entity.constraints[j].b.prev)
 				}
 
 				// project
 				for(var j = 0 ; j < entity.points.length ; j++) {
 					if(entity.points[j].now[1] < 0) {
-						var delta = 0 - entity.points[j].now[1]
+						entity.points[j].prev[1] = 0 - entity.points[j].now[1] + entity.points[j].prev[1]
 						entity.points[j].now[1] = 0
-						entity.points[j].prev[1] += delta
 					}
 				}
 			}
@@ -219,14 +216,9 @@
 
 					// apply normal force
 					if(entities[i].points[j].now[1] <= 0) {
-						var a = vec3.create()
-						vec3.subtract(entities[i].points[j].now, entities[i].points[j].prev, a)
-						vec3.scale(a, 1 / deltaTime / deltaTime)
-						var f = vec3.scale(a, entities[i].points[j].mass)
-						f[1] *= -0.8
-						vec3.add(entities[i].points[j].force, f, entities[i].points[j].force)
-
-						entities[i].points[j].prev[1] = 0
+						var t = entities[i].points[j].now[1]
+						entities[i].points[j].now[1] = entities[i].points[j].prev[1]
+						entities[i].points[j].prev[1] = t
 					}
 				}
 			}
