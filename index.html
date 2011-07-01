@@ -215,22 +215,31 @@
 					// accumulate forces - gravity 
 					entities[i].points[j].force = [0, -9.8 * entities[i].points[j].mass, 0]
 
-					// apply normal force
-					if(entities[i].points[j].now[1] <= 0) {
-						//Vnew = -2*(V dot N)*N + V
-						var delta = vec3.create()
-                                                vec3.subtract(entities[i].points[j].now, entities[i].points[j].prev, delta)
-						var v = vec3.create(delta)
-						vec3.dot(delta, [0, -1, 0], delta)
-						vec3.scale(delta, -2, delta)
-						vec3.cross(delta, [0, -1, 0], delta)
-						vec3.add(delta, v, delta)
-						// elasticness
-						vec3.scale(delta, 0.8, delta)
+					// collision detection
+					var p0 = [0, 0, 0]
+					var l0 = vec3.create(entities[i].points[j].now)
+					var l = vec3.create()
+					vec3.subtract(entities[i].points[j].now, entities[i].points[j].prev, l)
+					var n = [0, -1, 0]
 
-						// project to collision point
+					var nom = vec3.create()
+					vec3.subtract(p0, l0, nom)
+					nom = vec3.dot(nom, n)
+					var dnom = vec3.dot(l, n, dnom)
+					var d = nom / dnom
+
+					// apply normal force
+					if(dnom != 0 && d >= 0 && d <= 1) {
+						//Vnew = -2*(V dot N)*N + V
+						var v = vec3.create(l)
+						vec3.scale(n, -2 * vec3.dot(l, n), l)
+						vec3.add(l, v, l)
+						// elasticness
+						vec3.scale(l, 0.8, l)
+
+						// project to collision point and apply force by moving now and prev
                                                 entities[i].points[j].now[1] = 0
-                                                vec3.add(entities[i].points[j].now, delta, entities[i].points[j].prev)
+                                                vec3.subtract(entities[i].points[j].now, l, entities[i].points[j].prev)
 					}
 				}
 			}
