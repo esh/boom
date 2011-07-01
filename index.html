@@ -143,7 +143,7 @@
 					}
 				}
 			})
-			//entities.push(ball(0, 6, 0))
+			entities.push(ball(3, 6, -3))
 			
 			var box = (function(x, y, z) {
 				var points = new Array()
@@ -203,7 +203,7 @@
 					}
 				}
 			})
-			entities.push(box(10, 6, 10))
+			//entities.push(box(3, 6, 3))
 		}
 
 		buildMap()
@@ -229,17 +229,21 @@
 					var d = nom / dnom
 
 					// we collide when we've gone through the plane between now and prev
-					if(dnom != 0 && d <= 0 && d >= -1) {
-						//Vnew = -2*(V dot N)*N + V
+					if(dnom != 0 && d <= 0 && d > -1) {
+						// project to collision point
+						var t = vec3.create()
+						vec3.scale(l, d, t)
+						vec3.add(l0, t, entities[i].points[j].now)
+
+						// reflect force
+						// Vnew = -2*(V dot N)*N + V
 						var v = vec3.create(l)
 						vec3.scale(n, -2 * vec3.dot(l, n), l)
 						vec3.add(l, v, l)
 						// elasticness
 						vec3.scale(l, 0.8, l)
-
-						// project to collision point and apply force by moving now and prev
-                                                entities[i].points[j].now[1] = 0
-                                                vec3.subtract(entities[i].points[j].now, l, entities[i].points[j].prev)
+						// apply force
+						vec3.subtract(entities[i].points[j].now, l, entities[i].points[j].prev)
 					}
 				}
 			}
