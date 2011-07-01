@@ -52,6 +52,7 @@
 
 <script type="text/javascript">
 	var deltaTime = 1 / 50 
+	var damping = 0.001
 
 	var world = (function() {
 		var terrain = new Array()
@@ -84,16 +85,16 @@
 			for(var i = 0 ; i < entity.points.length ; i++) {
 				var a = vec3.scale(entity.points[i].force, 1 / entity.points[i].mass) 
 				var t = [entity.points[i].now[0], entity.points[i].now[1], entity.points[i].now[2]]
-				entity.points[i].now[0] = 2 * entity.points[i].now[0] - entity.points[i].prev[0] + a[0] * deltaTime * deltaTime 
-				entity.points[i].now[1] = 2 * entity.points[i].now[1] - entity.points[i].prev[1] + a[1] * deltaTime * deltaTime 
-				entity.points[i].now[2] = 2 * entity.points[i].now[2] - entity.points[i].prev[2] + a[2] * deltaTime * deltaTime
+				entity.points[i].now[0] = (2 - damping) * entity.points[i].now[0] - (1 - damping) * entity.points[i].prev[0] + a[0] * deltaTime * deltaTime 
+				entity.points[i].now[1] = (2 - damping) * entity.points[i].now[1] - (1 - damping) * entity.points[i].prev[1] + a[1] * deltaTime * deltaTime 
+				entity.points[i].now[2] = (2 - damping) * entity.points[i].now[2] - (1 - damping) * entity.points[i].prev[2] + a[2] * deltaTime * deltaTime
 				entity.points[i].prev = t
 				entity.points[i].force = [0, 0, 0] 
 			}
 		}
 
 		function buildMap() {
-			var stepSize = 4
+			var stepSize = 2
 			var rows = 128 
 			var cols = 128 
 			for(var x = 0 ; x < cols ; x++) {
@@ -111,8 +112,8 @@
 			}
 		}
 
-		function testBox() {
-			var ball= (function(x, y, z) {
+		function testWorld() {
+			var ball = (function(x, y, z) {
 				var points = new Array()
 				var constraints = new Array()
 				var forces = [0, 0, 0] 
@@ -142,7 +143,7 @@
 					}
 				}
 			})
-			entities.push(ball(0, 6, 0))
+			//entities.push(ball(0, 6, 0))
 			
 			var box = (function(x, y, z) {
 				var points = new Array()
@@ -202,11 +203,11 @@
 					}
 				}
 			})
-			//entities.push(box(0, 6, 0))
+			entities.push(box(10, 6, 10))
 		}
 
 		buildMap()
-		testBox()
+		testWorld()
 
 		function tick() {
 			for(var i = 0 ; i < entities.length ; i++) {
@@ -488,9 +489,9 @@
 	}
 
 	var position = {
-		x: -6,
+		x: -3,
 		y: 3,
-		z: -6,
+		z: -3,
 		yaw: 225,
 		pitch: 0,
 		roll: 0
