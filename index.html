@@ -143,7 +143,7 @@
 					}
 				}
 			})
-			entities.push(ball(0, 6, 0))
+			//entities.push(ball(0, 6, 0))
 			
 			var box = (function(x, y, z) {
 				var points = new Array()
@@ -203,7 +203,7 @@
 					}
 				}
 			})
-			//entities.push(box(10, 6, 10))
+			entities.push(box(10, 6, 10))
 		}
 
 		buildMap()
@@ -218,24 +218,19 @@
 					// apply normal force
 					if(entities[i].points[j].now[1] <= 0) {
 						//Vnew = -2*(V dot N)*N + V
-/*
 						var delta = vec3.create()
                                                 vec3.subtract(entities[i].points[j].now, entities[i].points[j].prev, delta)
 						var v = vec3.create(delta)
 						vec3.dot(delta, [0, -1, 0], delta)
 						vec3.scale(delta, -2, delta)
-						vec3.scale([0, -1, 0], delta, delta)
+						vec3.cross(delta, [0, -1, 0], delta)
 						vec3.add(delta, v, delta)
+						// elasticness
+						vec3.scale(delta, 0.8, delta)
 
-                                                vec3.add(entities[i].points[j].now, delta, entities[i].points[j].prev)
-*/
-
-                                                var delta = vec3.create()
-                                                vec3.subtract(entities[i].points[j].now, entities[i].points[j].prev, delta)
-                                                vec3.scale(delta, 0.8, delta)    
+						// project to collision point
                                                 entities[i].points[j].now[1] = 0
                                                 vec3.add(entities[i].points[j].now, delta, entities[i].points[j].prev)
-
 					}
 				}
 			}
