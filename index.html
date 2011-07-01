@@ -216,9 +216,11 @@
 
 					// apply normal force
 					if(entities[i].points[j].now[1] <= 0) {
-						var t = entities[i].points[j].now[1]
-						entities[i].points[j].now[1] = entities[i].points[j].prev[1]
-						entities[i].points[j].prev[1] = t
+                                                var delta = vec3.create()
+                                                vec3.subtract(entities[i].points[j].now, entities[i].points[j].prev, delta)
+                                                vec3.scale(delta, 0.8, delta)    
+                                                entities[i].points[j].now = vec3.create(entities[i].points[j].prev)
+                                                vec3.add(entities[i].points[j].prev, delta, entities[i].points[j].prev)
 					}
 				}
 			}
