@@ -225,11 +225,11 @@
 					var nom = vec3.create()
 					vec3.subtract(p0, l0, nom)
 					nom = vec3.dot(nom, n)
-					var dnom = vec3.dot(l, n, dnom)
+					var dnom = vec3.dot(l, n)
 					var d = nom / dnom
 
-					// apply normal force
-					if(dnom != 0 && d >= 0 && d <= 1) {
+					// we collide when we've gone through the plane between now and prev
+					if(dnom != 0 && d <= 0 && d >= -1) {
 						//Vnew = -2*(V dot N)*N + V
 						var v = vec3.create(l)
 						vec3.scale(n, -2 * vec3.dot(l, n), l)
