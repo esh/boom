@@ -53,10 +53,50 @@
 <script type="text/javascript">
 	var deltaTime = 1 / 50 
 	var damping = 0.001
+	var stepSize = 2
 
 	var world = (function() {
 		var terrain = new Array()
 		var entities = new Array()
+
+		function collide(now, prev) {
+			// collision detection
+			var p0 = [0, 0, 0]
+			var l0 = vec3.create(now)
+			var l = vec3.create()
+			vec3.subtract(now, prev, l)
+			var n = [0, -1, 0]
+
+			var nom = vec3.create()
+			vec3.subtract(p0, l0, nom)
+			nom = vec3.dot(nom, n)
+			var dnom = vec3.dot(l, n)
+			var d = nom / dnom
+
+			// we collide when we've gone through the plane between now and prev
+			if(dnom != 0 && d <= 0 && d > -1) {
+				// project to collision point
+				var t = vec3.create()
+				vec3.scale(l, d, t)
+				vec3.add(l0, t, t)
+
+				// reflect force
+				// Vnew = -2*(V dot N)*N + V
+				var v = vec3.create(l)
+				vec3.scale(n, -2 * vec3.dot(l, n), l)
+				vec3.add(l, v, l)
+				// elasticness
+				vec3.scale(l, 0.8, l)
+			
+				return {
+					normal: n,
+					force: l,
+					point: t
+				} 
+			} else {
+				return null
+			}
+		}
 
 		function satisfyConstraints(entity) {
 			for(var i = 0 ; i < 10 ; i++) {
@@ -94,7 +134,6 @@
 		}
 
 		function buildMap() {
-			var stepSize = 2
 			var rows = 128 
 			var cols = 128 
 			for(var x = 0 ; x < cols ; x++) {
@@ -216,34 +255,10 @@
 					entities[i].points[j].force = [0, -9.8 * entities[i].points[j].mass, 0]
 
 					// collision detection
-					var p0 = [0, 0, 0]
-					var l0 = vec3.create(entities[i].points[j].now)
-					var l = vec3.create()
-					vec3.subtract(entities[i].points[j].now, entities[i].points[j].prev, l)
-					var n = [0, -1, 0]
-
-					var nom = vec3.create()
-					vec3.subtract(p0, l0, nom)
-					nom = vec3.dot(nom, n)
-					var dnom = vec3.dot(l, n)
-					var d = nom / dnom
-
-					// we collide when we've gone through the plane between now and prev
-					if(dnom != 0 && d <= 0 && d > -1) {
-						// project to collision point
-						var t = vec3.create()
-						vec3.scale(l, d, t)
-						vec3.add(l0, t, entities[i].points[j].now)
-
-						// reflect force
-						// Vnew = -2*(V dot N)*N + V
-						var v = vec3.create(l)
-						vec3.scale(n, -2 * vec3.dot(l, n), l)
-						vec3.add(l, v, l)
-						// elasticness
-						vec3.scale(l, 0.8, l)
-						// apply force
-						vec3.subtract(entities[i].points[j].now, l, entities[i].points[j].prev)
+					var cd = collide(entities[i].points[j].now, entities[i].points[j].prev)
+					if(cd) {
+						entities[i].points[j].now = cd.point
+						vec3.subtract(entities[i].points[j].now, cd.force, entities[i].points[j].prev)
 					}
 				}
 			}
