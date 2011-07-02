@@ -113,9 +113,12 @@
 
 				// project
 				for(var j = 0 ; j < entity.points.length ; j++) {
-					if(entity.points[j].now[1] < 0) {
-						entity.points[j].prev[1] = 0 - entity.points[j].now[1] + entity.points[j].prev[1]
-						entity.points[j].now[1] = 0
+					var cd = collide(entity.points[j].now, entity.points[j].prev)
+					if(cd) {
+						var delta = vec3.create()
+						vec3.subtract(cd.point, entity.points[j].now, delta)
+						entity.points[j].now = cd.point
+						vec3.add(entity.points[j].prev, delta, entity.points[j].prev)
 					}
 				}
 			}
