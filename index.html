@@ -71,30 +71,37 @@
 			vec3.subtract(p0, l0, nom)
 			nom = vec3.dot(nom, n)
 			var dnom = vec3.dot(l, n)
-			var d = nom / dnom
-
-			// we collide when we've gone through the plane between now and prev
-			if(dnom != 0 && d <= 0 && d > -1) {
-				// project to collision point
-				var t = vec3.create()
-				vec3.scale(l, d, t)
-				vec3.add(l0, t, t)
-
-				// reflect force
-				// Vnew = -2*(V dot N)*N + V
-				var v = vec3.create(l)
-				vec3.scale(n, -2 * vec3.dot(l, n), l)
-				vec3.add(l, v, l)
-				// elasticness
-				vec3.scale(l, 0.8, l)
-			
-				return {
-					normal: n,
-					force: l,
-					point: t
-				} 
-			} else {
+			if(dnom == 0 && !isNaN(nom)) {
 				return null
+			} else if(nom == 0 && dnom == 0) {
+				throw "line in plane"
+			} else if(!isNaN(nom) && !isNaN(dnom)) {
+				// project to collision point
+				var d = nom / dnom
+				var point = vec3.create()
+				vec3.scale(l, d, point)
+				vec3.add(l0, point, point)
+				var t = vec3.create()
+				vec3.subtract(now, point, t)
+				if(vec3.dot(t, n) >= 0) {
+					// reflect force
+					// Vnew = -2*(V dot N)*N + V
+					var v = vec3.create(l)
+					vec3.scale(n, -2 * vec3.dot(l, n), l)
+					vec3.add(l, v, l)
+					// elasticness
+					vec3.scale(l, 0.8, l)
+
+					return {
+						normal: n,
+						force: l,
+						point: point
+					} 
+				} else {
+					return null
+				}
+			} else {
+				throw "impossible exception"
 			}
 		}
 
